@@ -1,0 +1,9 @@
+\contentsline {section}{\numberline {1}Problem}{2}{section.1}
+\contentsline {section}{\numberline {2}Using the code}{2}{section.2}
+\contentsline {section}{\numberline {3}Solutions}{3}{section.3}
+\contentsline {subsection}{\numberline {3.1}Polynomial through non equidistant points}{3}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Natural cubic spline}{3}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Cubic spline with modified conditions}{3}{subsection.3.3}
+\contentsline {section}{\numberline {4}Conclusion}{3}{section.4}
+\contentsline {section}{Appendices}{4}{section*.2}
+\contentsline {section}{\numberline {A}main.cpp}{4}{appendix.A}

@@ -1,0 +1,129 @@
+\documentclass[11pt, a4paper, titlepage, openright]{article}
+% \usepackage[options]{package}
+
+\title{\LARGE Scientific Programming \\ \normalsize Data Fitting Exercise 1}
+\author{Armin Halilovic - s0122210}
+\date{October 30, 2015}
+
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+%\floatstyle{boxed}
+\restylefloat{figure}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{mathtools}
+%\usepackage{titlesec}
+\usepackage[titletoc, title]{appendix}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=C++,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\footnotesize\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  showstringspaces=false
+}
+
+\begin{document}
+\input{title_page.tex}
+\onecolumn
+\tableofcontents
+\newpage
+%\twocolumn
+
+
+\section{Problem}
+\section{Using the code}
+    All of the C++ code can be found in the "main.cpp" file and in appendix A of this document.
+    main.cpp comes accompanied by createImages.sh, which contains all of the neccessary UNIX commands to generate the graph images.
+    This file relies on the \href{https://www.gnu.org/software/plotutils/manual/en/html_node/graph.html}{graph} program
+    in the GNU plotutils package to plot graphs, so make sure that it is installed.
+
+    To compile and run the program, execute the following commands in the build/ directory:
+    \begin{lstlisting}
+    cmake ..
+    make
+    chmod +x ./createImages.sh
+    ./data_fitting
+    \end{lstlisting}
+    All of the graphs should be present in the build/images/ directory. If they are not there, make createImages.sh executable
+    with "chmod +x" and run it to create them.
+
+\newpage
+\section{Solutions}
+\subsection{Polynomial through non equidistant points}
+\subsection{Natural cubic spline}
+\subsection{Cubic spline with modified conditions}
+
+\section{Conclusion}
+    After conducting the interpolations, we can conclude that using a cubic spline is the best way to
+    approximate the Runge function, if we had to choose between polynomial and spline interpolation.
+    This conforms to what we learned during the lecture on data fitting.
+
+
+
+\onecolumn
+\appendix
+\appendixpage
+\addappheadtotoc
+
+\section{main.cpp}
+    \lstinputlisting[basicstyle=\scriptsize]{../main.cpp}
+    \newpage
+
+%\section{createImages.sh}
+%    \lstinputlisting[language=bash, basicstyle=\scriptsize]{../createImages.sh}
+
+\end{document}
+
+/iffalse
+
+\[f(x) = \frac{1}{1 + 25 x^{2}} \ \ x \in [-1, 1] \]
+\subsection{Polynomial through equidistant points}
+\label{sec:firstpoly}
+\begin{lstlisting}
+int i = 0, size = 17;
+double xi, xa1[size], ya1[size];
+for (xi = -1; xi <= 1; xi = xi + ( 2 / (double) 16)) {
+    xa1[i] = xi;
+    ya1[i] = runge_f(xi);
+    i++;
+}
+\end{lstlisting}
+\href{https://www.gnu.org/software/gsl/manual/html_node/1D-Higher_002dlevel-Interface.html#g_t1D-Higher_002dlevel-Interface}{gsl\_spline}
+In figure~\ref{fig:runge}, we can see what the Runge function looks like.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../images/spline2}
+    \caption{Spline interpolation through equidistant points}
+    \label{fig:spline2}
+\end{figure}
+\begin{figure}[H]
+    \begin{minipage}[b]{0.49\textwidth}
+        \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../images/diff4abs}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.49\textwidth}
+        \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../images/diff4rel}
+    \end{minipage}
+    \caption{Differences for spline interpolation}
+    \label{fig:diff4}
+\end{figure}
+\bigskip
+
+/fi
