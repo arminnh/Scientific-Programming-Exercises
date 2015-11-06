@@ -1,79 +1,60 @@
+#include <math.h>
 #include <stdio.h>
+#include <fstream>
 #include <iostream>
+#include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_pow_int.h>
-
-/*
- * Conditioning: kappa(A)
- * LU decomposition / maybe show multipliers
- * Gaussian elimination with and without pivoting
- * Residual/Error vectors
- * Theorem 14.1
- */
+#include <gsl/gsl_vector_double.h>
+#include <gsl/gsl_matrix_double.h>
+#include <cmath>
+#include "functions.h"
 
 int main (void) {
-    int size_i = 3, size_j = 3;
-    double a[size_i][size_j] = {{3.021,  2.174, 6.913},
-                                {1.031, -4.273, 1.121},
-                                {5.084, -5.832, 9.155}};
-    double y[size_j] = {12.648,
-                        -2.121,
-                        8.407};
+    static const int size_i = 3, size_j = 3;
 
-    // A*X = Y
+    //Input data which will be used to create and solve systems of equations
+    double a[][size_j] = {{3.021,  2.174, 6.913},
+                          {1.031, -4.273, 1.121},
+                          {5.084, -5.832, 9.155}};
+    double y[] = {12.648,
+                  -2.121,
+                  8.407};
+
+    //Open the file to write output to
+    std::ofstream output("output.txt", std::ofstream::out);
+
+    //Initialize matrices A and Y for the equation Ax = Y
     gsl_matrix *A = gsl_matrix_alloc(size_i, size_j);
     gsl_vector *Y = gsl_vector_alloc(size_j);
-    gsl_vector *X = gsl_vector_alloc(size_j);
-    gsl_vector *r = gsl_vector_alloc(size_j);
 
-    for (int i = 0; i < size_i; i++)
+    //Put the input data into matrix A and vector Y
+    for (int i = 0; i < size_i; i++) {
         for (int j = 0; j < size_j; j++) {
-            gsl_vector_set(Y, j, y[j]);
             gsl_matrix_set(A, i, j, a[i][j]);
+
+            if (i == size_j-1) gsl_vector_set(Y, j, y[j]);
         }
+    }
 
-    gsl_matrix *LU = gsl_matrix_alloc(size_i, size_j);
-    gsl_matrix_memcpy(LU, A);
+    //Do the exercise for the input data
+    solve(A, Y, output);
 
-    //The algorithm used in the decomposition is Gaussian Elimination with partial pivoting
-    gsl_permutation *p = gsl_permutation_alloc(size_i);
-    int pInt = static_cast<int>(gsl_pow_int(-1, size_i));
-    gsl_linalg_LU_decomp(LU, p, &pInt);
-    gsl_linalg_LU_solve(LU, p, Y, X);
+    output   <<  "\n===============================\n" << std::endl;
+    std::cout << "\n===============================\n" << std::endl;
 
-    gsl_linalg_LU_refine(A, LU, p, Y, X, r);
-
-    FILE *output = fopen("output.txt", "w");
-    gsl_matrix_fprintf(output, A, "%g");
-    fprintf(output,"======\n");
-    gsl_matrix_fprintf(output, LU, "%g");
-    fprintf(output,"======\n");
-    gsl_vector_fprintf(output, X, "%g");;
-    fprintf(output,"======\n");
-    gsl_vector_fprintf(output, r, "%g");
-
-
+    //Introduce a change into A
+    output   <<  "Changed a_1,1 from " << gsl_matrix_get(A, 1, 1) <<" to -4.275" << std::endl;
+    std::cout << "Changed a_1,1 from " << gsl_matrix_get(A, 1, 1) <<" to -4.275" << std::endl;
     gsl_matrix_set(A, 1, 1, -4.275);
-    gsl_matrix_memcpy(LU, A);
-    gsl_linalg_LU_decomp(LU, p, &pInt);
-    gsl_linalg_LU_solve(LU, p, Y, X);
-    gsl_linalg_LU_refine(A, LU, p, Y, X, r);
 
-    fprintf(output,"======\n\n\n");
-    gsl_matrix_fprintf(output, A, "%g");
-    fprintf(output,"======\n");
-    gsl_matrix_fprintf(output, LU, "%g");
-    fprintf(output,"======\n");
-    gsl_vector_fprintf(output, X, "%g");
-    fprintf(output,"======\n");
-    gsl_vector_fprintf(output, r, "%g");
+    //Do the exercise for the changed matrix A
+    solve(A, Y, output);
 
-    fcloseall();
+    //Free the memory
+    output.close();
     gsl_matrix_free(A);
-    gsl_matrix_free(LU);
-    gsl_vector_free(X);
     gsl_vector_free(Y);
-    gsl_permutation_free(p);
+
     return 0;
 }
-//gsl_matrix_swap_rows();
