@@ -14,5 +14,5 @@
 \contentsline {subsection}{\numberline {A.1}main.cpp}{8}{subsection.A.1}
 \contentsline {subsection}{\numberline {A.2}functions.h}{9}{subsection.A.2}
 \contentsline {subsection}{\numberline {A.3}functions.cpp}{9}{subsection.A.3}
-\contentsline {section}{\numberline {B}Output}{13}{appendix.B}
-\contentsline {subsection}{\numberline {B.1}output.txt}{13}{subsection.B.1}
+\contentsline {section}{\numberline {B}Output}{12}{appendix.B}
+\contentsline {subsection}{\numberline {B.1}output.txt}{12}{subsection.B.1}

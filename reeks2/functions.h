@@ -1,10 +1,9 @@
 #ifndef PROJECT_FUNCTIONS_H
 #define PROJECT_FUNCTIONS_H
 
+#include <fstream>
 #include <gsl/gsl_vector_double.h>
 #include <gsl/gsl_matrix_double.h>
-#include <fstream>
-#include <string>
 
 void printVector(const gsl_vector * v, std::string string);
 void printVector(const gsl_vector * v, std::string string, std::ostream &);

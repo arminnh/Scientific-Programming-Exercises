@@ -1,16 +1,10 @@
 #include "functions.h"
 
-#include <stdio.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <math.h>
+#include <cmath>
 #include <iomanip>
 #include <iostream>
-#include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_pow_int.h>
 #include <gsl/gsl_matrix_double.h>
-#include <cmath>
 
 
 void printVector(const gsl_vector * v, std::string string) {
