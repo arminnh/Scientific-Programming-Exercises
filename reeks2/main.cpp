@@ -9,7 +9,7 @@ int main (void) {
     static const int size_i = 3, size_j = 3;
 
     //Input data which will be used to create and solve systems of equations
-    double a[][size_j] = {{3.021,  2.174, 6.913},
+    double a[][size_j] = {{3.021,  2.714, 6.913},
                           {1.031, -4.273, 1.121},
                           {5.084, -5.832, 9.155}};
     double y[] = {12.648,
@@ -27,9 +27,8 @@ int main (void) {
     for (int i = 0; i < size_i; i++) {
         for (int j = 0; j < size_j; j++) {
             gsl_matrix_set(A, i, j, a[i][j]);
-
-            if (i == size_j-1) gsl_vector_set(Y, j, y[j]);
         }
+        gsl_vector_set(Y, i, y[i]);
     }
 
     //Do the exercise for the input data
@@ -39,7 +38,7 @@ int main (void) {
     std::cout << "\n===============================\n" << std::endl;
 
     //Introduce a change into A
-    output   <<  "Changed a_1,1 from " << gsl_matrix_get(A, 1, 1) <<" to -4.275" << std::endl;
+    output    << "Changed a_1,1 from " << gsl_matrix_get(A, 1, 1) <<" to -4.275" << std::endl;
     std::cout << "Changed a_1,1 from " << gsl_matrix_get(A, 1, 1) <<" to -4.275" << std::endl;
     gsl_matrix_set(A, 1, 1, -4.275);
 

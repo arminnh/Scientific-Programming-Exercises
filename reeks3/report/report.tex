@@ -1,0 +1,274 @@
+\documentclass[11pt, a4paper, titlepage, openright]{article}
+
+\usepackage{amsmath}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+\restylefloat{figure}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage[titletoc, title]{appendix}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{fixltx2e}
+\usepackage[bottom]{footmisc}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=C++,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\footnotesize\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  showstringspaces=false,
+  keepspaces=true, 
+  columns=flexible
+}
+
+\begin{document}
+\input{title_page.tex}
+\tableofcontents
+\newpage
+
+\section{Problem}
+    We are given the following set of data points:
+    \[
+    \begin{tabular}{l | *{7}{c}}
+        x & 0.635 & 1.435 & 2.235 & 3.035 & 3.835 & 4.635 & 5.435 \\
+        y & 7.50  & 4.35  & 2.97  & 2.20  & 1.70  & 1.28  & 1.00 \\
+    \end{tabular}
+    \]
+
+    We will use data smoothing techniques to create an approximating function that attempts to capture important patterns in the data.
+    We assume that the following is true:
+    \[ y_i = \lambda_1 f_1(x_i) + ... +  \lambda_n f_n(x_i) \ \ where \ \ i = 1,...,m \gg n \]
+    From this, we can for construct the \(m * n \) linear system \(A\lambda = y \). \\
+    We will use QR factorization to decompose and solve this system.\\
+
+    All of this will be done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
+    In section~\ref{sec:solutions}, we will describe how we reached each solution, using \emph{only} the 
+    most important parts from our code. Some basic knowledge of the GSL is assumed.
+
+\bigskip
+\bigskip
+\section{Using the program}
+    All of the C++ code for the program can be found in the main.cpp and in appendix A of this document.
+    main.cpp comes accompanied by \mbox{createImages.sh}, which contains all of the necessary UNIX commands to generate the graph images.
+    This file relies on the \href{https://www.gnu.org/software/plotutils/manual/en/html_node/graph.html}{graph} program
+    in the GNU plotutils package to plot graphs, so make sure that it is installed.
+
+    To compile and run the program, execute the following commands in the build/ directory:
+\begin{lstlisting}
+cmake ..
+make
+chmod +x ./createImages.sh
+./data_smoothing
+\end{lstlisting}
+    All of the graphs should be present in the build/images/ directory. If they are not there, make createImages.sh executable
+    with "chmod +x" and run it to create them.
+
+\newpage
+\section{Course of action}
+    What follows is a brief set of steps we will use to solve the exercise:
+    \begin{enumerate}
+        \item Load the input matrix A and vector Y.
+        \item Find the LU decomposition of A.
+        \item Solve the system using the LU decomposition.
+            \subitem Also, find the residual error vector.\footnote{We cannot find the error vector, since we do not have the exact solution for \(x\) in \(Ax = y\)}
+        \item Calculate the condition number of the matrix.
+        \item Calculate the maximum possible error of the solution.
+    \end{enumerate}
+    
+\bigskip
+\section{Solutions}
+\label{sec:solutions}
+    \subsection{Datapoints plot}
+    \subsection{Plot of \(\log(y_i)\)}
+    \subsection{Setting up the matrix}
+    \subsection{QR factorization}
+    \subsection{Solving the first system of equations}
+        Initializing all of the necessary structs and loading the input matrix and vector 
+        is a trivial task, so we will start at the LU decomposition step.
+    \subsubsection{LU decomposition}
+    We know that \(PA = LU\). GSL makes it very easy to find LU decompositions; gsl\_linalg\_LU\_decomp will find the LU 
+    decomposition by executing Gaussian Elimination with partial pivoting.
+\begin{lstlisting}
+gsl_matrix_memcpy(LU, A);
+gsl_linalg_LU_decomp(LU, P, &sigNum);
+\end{lstlisting}
+    gsl\_linalg\_LU\_decomp writes the result to its first argument, so we will copy A to a new matrix 
+    LU first, as we will need A later on. P will contain the permutation matrix, which is not relevant for 
+    this exercise. \\ This will result in the following output:
+    
+\begin{lstlisting}
+Matrix LU, result of LU decomposition:
+                5.084               -5.832                9.155
+    0.594217151848938     5.63947442958301     1.47294197482297
+     0.20279307631786   -0.547978507128854   0.0715699307609119
+     
+\end{lstlisting}
+    \subsubsection{Solving the system}
+    The code for this part is very straightforward:
+\begin{lstlisting}
+gsl_linalg_LU_solve(LU, P, Y, X);
+gsl_linalg_LU_refine(A, LU, P, Y, X, r);
+\end{lstlisting}
+    gsl\_linalg\_LU\_solve will use the LU decomposition and permutation matrix to solve the system of equations.
+    The solution for the system will be stored in X. gsl\_linalg\_LU\_refine is then used to find the residual vector r.\\
+    The residual vector is the vector r so that \[ r = y - Ax \] where \(y\) is known exactly and \(Ax\) is calculated. 
+    
+    We will get the output:
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+    -7.57416762700087
+   0.0158780881981559
+     5.13453514211295
+
+Vector r, residual of solving by LU decomposition:
+  4.0146050319364e-14
+  4.8599800162611e-15
+-1.95862184650587e-14
+\end{lstlisting}
+    The vector X we have found here can be interpreted as a point in a 3D space, where, for example 
+\begin{align*}
+    x = -7.57416762700087 \\ 
+    y = 0.0158780881981559 \\
+    z =  5.13453514211295
+\end{align*}
+    This point could then represent the intersection point of the three planes given in the system of this exercise. \\
+    We notice that the values for the residual vector are extremely small, this indicates that the resulting 
+    vector X is very precise.
+
+    \subsubsection{Condition number of A}
+    To calculate the condition number of A, we will use the following definition: \[\kappa(A)= \frac{|max(S)|}{|min(S)|} \]
+    where S is the vector of singular values of A. In GSL, we can find S by using gsl\_linalg\_SV\_decomp.
+\begin{lstlisting}
+gsl_linalg_SV_decomp(U, V, S, work);
+
+double condNumber, minS, maxS;
+minS = gsl_vector_get(S, 0); maxS = gsl_vector_get(S, 0);
+for (int j = 0; j < size_j; j++) {
+    if (gsl_vector_get(S, j) < minS) minS = gsl_vector_get(S, j);
+    if (gsl_vector_get(S, j) > maxS) maxS = gsl_vector_get(S, j);
+}
+condNumber = fabs(maxS) / fabs(minS);
+\end{lstlisting}
+    After doing this, we can generate the following output:
+\begin{lstlisting}
+Vector S, singular values of A, result of doing SV decomposition:
+     13.7188626226398
+     6.13888725147292
+   0.0243650331438208
+
+Condition number = 13.7188626226398 / 0.0243650331438208 = 563.055364696643
+\end{lstlisting}
+    We get a condition number of about 563. Informally, we know that
+    \begin{quotation}
+    As a rule of thumb, if the condition number  \(\kappa(A) = 10^k\), 
+    then you may lose up to k digits of accuracy on top of what 
+    would be lost to the numerical method due to loss of precision 
+    from arithmetic methods.\footnote{https://en.wikipedia.org/wiki/Condition\_number}
+    \end{quotation}
+    This way, we can quickly estimate that with a condition number of 563 we \emph{may} lose approximately 
+    3 digits of accuracy (in the vector X) on top of the loss caused by machine precision.\\
+    
+    Next, we will use the condition number and more formally describe the maximum inaccuracy 
+    which \emph{may} occur after these calculations.
+    
+    \subsubsection{Maximum possible error}
+    We know the following inequalitíes which express that the maximum possible relative errors are bounded:
+    \[\frac{\mid\mid y - Ax\textsubscript{*} \mid\mid}{\mid\mid A \mid\mid \ \mid\mid x\textsubscript{*}\mid\mid} \leq \rho \epsilon,\ \ \ \ \ 
+    \frac{\mid\mid x - x\textsubscript{*} \mid\mid}{\mid\mid x\textsubscript{*} \mid\mid} \leq \rho \kappa(A) \epsilon \]
+    Here, \(\epsilon\) is the relative machine precision eps. For a double, 
+    this is \(2.22\mbox{\sc{e}-}16 \).\footnote{https://en.wikipedia.org/wiki/Machine\_epsilon\#Values\_for\_standard\_hardware\_floating\_point\_arithmetics}
+    If we take the approximately worst case for p, which is around 10, then we get that \(\rho \epsilon = 2.22\mbox{\sc{e}-}15 \)
+
+    \newpage
+    In the second formula, we see a better way to describe the impact that the condition number has on the
+    accuracy of the calculations for \(x\). For \(\rho \kappa(A) \epsilon\), we find:
+\begin{align*}
+    \rho \kappa(A) \epsilon \approx 10 * 563.055364696643 *2.22\mbox{\sc{e}-}16\\ 
+    \rho \kappa(A) \epsilon \approx 1.24998290962654746\mbox{\sc{e}-}12 \\
+    \rho \kappa(A) \epsilon \approx 1.25\mbox{\sc{e}-}12
+\end{align*}
+     We can now say that our result for \(x\) will have a maximal error of \(1.25\mbox{\sc{e}-}12\),
+     with respect to the exact solutions for \(x\).
+    
+    \subsection{Solving the system after changing a\textsubscript{2,2}}
+    In this section, we change a\textsubscript{2,2} from -4.273 to -4.275, and just repeat all of the steps.
+    The most important parts of the output are shown below.
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+    -7.57509282124123 
+   0.0157630382743384
+     5.13497563543488
+
+Vector r, residual of solving by LU decomposition:
+ 9.58958990610966e-14
+ 1.12524872037495e-14
+-4.64732888184761e-14
+
+Condition number = 13.7190169534295 / 0.024538406356238 = 559.083452864162
+\end{lstlisting}
+    We notice that the condition number has decreased, which means the maximum inaccuracy that \emph{may}
+    occur also decreassed. We see this when calculating \(\rho \kappa(A) \epsilon\):
+\begin{align*}
+    \rho \kappa(A) \epsilon \approx 10 * 559.083452864162 *2.22\mbox{\sc{e}-}16\\ 
+    \rho \kappa(A) \epsilon \approx 1,241165265\mbox{\sc{e}-}12 \\
+    \rho \kappa(A) \epsilon \approx 1.24\mbox{\sc{e}-}12
+\end{align*}
+    Coincidentally, the residual vector \emph{increased} in this case, which means the calculated solution
+    for the system of equations became less accurate. \\
+    This can be interpreted graphically as the point in 3D space moving away from the intersection of
+    the three planes.\\
+    
+    Thus, we have found that changing a\textsubscript{2,2} from -4.273 to -4.275 has decreased the condition
+    number for the matrix, but increased the residual vector. This is perfectly possible, with the condition
+    number we can only make a statement about the maximum \emph{possible} error, we cannot say anything about
+    the actual error without knowing the exact solution.
+\section{Conclusion}
+    We have solved the given system of equations and found the following vector as a solution.
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+    -7.57509282124123
+   0.0157630382743384
+     5.13497563543488
+\end{lstlisting}
+    The maximum possible error of this vector X, with respect to the exact solutions for \(x\),
+    is approximately \(1.25\mbox{\sc{e}-}12\). \\
+    Graphically, this can be interpreted to be the point in 3D space, that is the intersection of three planes.\\
+    
+    We have found that changing a\textsubscript{2,2} from -4.273 to -4.275 decreased the maximum possible error
+    to approximately \(1.24\mbox{\sc{e}-}12\). However, we noticed that the actual error of the vector X increased in this case.\\
+    Graphically, we can say that the point moved away from the intersection of the planes.
+
+\onecolumn
+\appendix
+\appendixpage
+\addappheadtotoc
+
+\section{Code}
+	\subsection{main.cpp}
+		\lstinputlisting[basicstyle=\scriptsize]{../main.cpp}
+	\bigskip
+	\subsection{createImages.sh}
+		\lstinputlisting[basicstyle=\scriptsize]{../createImages.sh}
+
+\newpage
+\section{Output}
+	\subsection{output.txt}
+		%\lstinputlisting[basicstyle=\scriptsize]{../build/output.txt} 
+		
+\end{document}
