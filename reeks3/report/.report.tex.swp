@@ -53,13 +53,13 @@
 
     We will use data smoothing techniques to create an approximating function that attempts to capture important patterns in the data.
     We assume that the following is true:
-    \[ y_i = \lambda_1 f_1(x_i) + ... +  \lambda_n f_n(x_i) \ \ where \ \ i = 1,...,m \gg n \]
+    \[ \lambda_1 f_1(x_i) + ... +  \lambda_n f_n(x_i) = y_i \ \ where \ \ i = 1,...,m \gg n \]
     From this, we can for construct the \(m * n \) linear system \(A\lambda = y \). \\
     We will use QR factorization to decompose and solve this system.\\
 
-    All of this will be done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
-    In section~\ref{sec:solutions}, we will describe how we reached each solution, using \emph{only} the 
-    most important parts from our code. Some basic knowledge of the GSL is assumed.
+    This will be done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
+    In section~\ref{sec:solutions}, we will describe how we reached each solution, using the 
+    most important parts from the code. Some basic knowledge of the GSL is assumed.
 
 \bigskip
 \bigskip
@@ -73,186 +73,197 @@
 \begin{lstlisting}
 cmake ..
 make
-chmod +x ./createImages.sh
-./data_smoothing
+chmod +x ./data_smoothing.sh
+./data_smoothing.sh
 \end{lstlisting}
-    All of the graphs should be present in the build/images/ directory. If they are not there, make createImages.sh executable
-    with "chmod +x" and run it to create them.
-
-\newpage
-\section{Course of action}
-    What follows is a brief set of steps we will use to solve the exercise:
-    \begin{enumerate}
-        \item Load the input matrix A and vector Y.
-        \item Find the LU decomposition of A.
-        \item Solve the system using the LU decomposition.
-            \subitem Also, find the residual error vector.\footnote{We cannot find the error vector, since we do not have the exact solution for \(x\) in \(Ax = y\)}
-        \item Calculate the condition number of the matrix.
-        \item Calculate the maximum possible error of the solution.
-    \end{enumerate}
+    Do not forget the .sh extension. All of the graphs will be present in the build/images/ directory. Output files which give some extra information 
+    about the solutions can be found in build/output/ and in appendix B.
     
-\bigskip
+\newpage
 \section{Solutions}
 \label{sec:solutions}
     \subsection{Datapoints plot}
+    We begin by plotting and examining the given datapoints.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/datapoints}
+        \caption{The given data points}
+    \end{figure}
+    
+    We notice that the plot of the points look like they follow a decreasing exponential function. We will plot the points \((x_i, \log(y_i)) \) next, 
+    because we expect it might give us an easier relationship between x and y to work with.\\
+    
+    If we find that using the logarithmic function makes the relationship easier to work with, then we can create an approximating model \(g(x)\) for the points
+    \((x_i, \log(y_i)) \). Afterwards, we can use \(\exp(g(x)) \) as an approximation for the originial data points.
+    
     \subsection{Plot of \(\log(y_i)\)}
-    \subsection{Setting up the matrix}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/log_datapoints}
+        \caption{log of the given data points}
+        \label{fig:logdata}
+    \end{figure}
+    As expected, we find a more pleasing relationship to work with. The graph of \((x_i, \log(y_i)) \) seems to be following a linear equation, which gives
+    us a good idea of which base function \(f_k(x) \) where \(k = 1,...,n\) to use in 
+    \[ \lambda_1 f_1(x_i) + ... +  \lambda_n f_n(x_i) = y_i \ \ \text{where} \ \ i = 1,...,m \gg n \]
+    Since figure~\ref{fig:logdata} seems to follow a linear equation, we will use \mbox{\( f_k(x) = x^{k-1} \) where \(k = 1, 2 \)} to create an approximating 
+    model. We then then get
+    \[ \lambda_1 f_1(x_i) + \lambda_2 f_2(x_i) = y_i \]
+    and can start constructing the overdetermined system of equations we will use to find the approximating model.
+    \subsection{Setting up the system of equations}
+    Now that we have a base function, we can fill in the system \( A\lambda = y \) we will work with. The system looks like this:
+    \[
+    \begin{bmatrix} f_1(x_i) & f_2(x_i) \end{bmatrix} 
+    \times 
+    \left[ \begin{array}{c}  \lambda_1 \\ \lambda_2  \end{array} \right]
+    =
+    \left[ \begin{array}{c} y_i \end{array} \right]
+    \]
+    
+     \( A \) and \( y \) are constructed in the code as follows:
+\begin{lstlisting}
+gsl_matrix *A = gsl_matrix_alloc(size, n);
+gsl_vector *Y = gsl_vector_alloc(size);
+
+for (int i = 0; i < size; i++) {    //size = amount of points
+    for (int j = 0; j < n; j++) {   //n = 2
+        gsl_matrix_set(A, i, j, baseFunction(xa1[i], j));
+    }
+    gsl_vector_set(Y, i, ya2[i]);
+}
+\end{lstlisting}
+    Later, we will also construct the system with higher values for n (which we will call the degree) to see what happens to the approximation.
+
     \subsection{QR factorization}
-    \subsection{Solving the first system of equations}
-        Initializing all of the necessary structs and loading the input matrix and vector 
-        is a trivial task, so we will start at the LU decomposition step.
-    \subsubsection{LU decomposition}
-    We know that \(PA = LU\). GSL makes it very easy to find LU decompositions; gsl\_linalg\_LU\_decomp will find the LU 
-    decomposition by executing Gaussian Elimination with partial pivoting.
-\begin{lstlisting}
-gsl_matrix_memcpy(LU, A);
-gsl_linalg_LU_decomp(LU, P, &sigNum);
-\end{lstlisting}
-    gsl\_linalg\_LU\_decomp writes the result to its first argument, so we will copy A to a new matrix 
-    LU first, as we will need A later on. P will contain the permutation matrix, which is not relevant for 
-    this exercise. \\ This will result in the following output:
+    Since the system \(A \lambda = y \) is overdetermined, we cannot solve it exactly, so we will find the least squares solution for it. 
+    The least squares solution will minimize the Euclidean norm of the residual, \(||A\lambda - y||\). \\
+    Before we do that, QR factorization will be used to decompose the matrix \( A \) into a product \( A = QR \) 
+    of an orthogonal matrix \(Q\) and an upper triangular matrix \(R\). \\
     
+    This is done very easily using GSL:
 \begin{lstlisting}
-Matrix LU, result of LU decomposition:
-                5.084               -5.832                9.155
-    0.594217151848938     5.63947442958301     1.47294197482297
-     0.20279307631786   -0.547978507128854   0.0715699307609119
-     
+gsl_linalg_QR_decomp(QR, tau);
+gsl_linalg_QR_lssolve(QR, tau, Y, X, R);
 \end{lstlisting}
-    \subsubsection{Solving the system}
-    The code for this part is very straightforward:
+
+    \subsection{Results}
+    We get the following solution for the system:
 \begin{lstlisting}
-gsl_linalg_LU_solve(LU, P, Y, X);
-gsl_linalg_LU_refine(A, LU, P, Y, X, r);
+ 2.10317965707954
+-0.403985459719526
 \end{lstlisting}
-    gsl\_linalg\_LU\_solve will use the LU decomposition and permutation matrix to solve the system of equations.
-    The solution for the system will be stored in X. gsl\_linalg\_LU\_refine is then used to find the residual vector r.\\
-    The residual vector is the vector r so that \[ r = y - Ax \] where \(y\) is known exactly and \(Ax\) is calculated. 
+    These are the coefficients for the model \(g(x)\) for the points \((x_i, \log(y_i)) \). \\
+    Thus, we have found that \( g(x) = 2.10317965707954 - 0.403985459719526x\).
+    The graph for g(x) along with the points \((x_i, \log(y_i)) \) can be seen in figure~\ref{fig:gxlogdata}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree2}
+        \caption{model g(x) and log of the given data points}
+        \label{fig:gxlogdata}
+    \end{figure}
     
-    We will get the output:
-\begin{lstlisting}
-Vector X, result of solving with LU decomposition:
-    -7.57416762700087
-   0.0158780881981559
-     5.13453514211295
-
-Vector r, residual of solving by LU decomposition:
-  4.0146050319364e-14
-  4.8599800162611e-15
--1.95862184650587e-14
-\end{lstlisting}
-    The vector X we have found here can be interpreted as a point in a 3D space, where, for example 
-\begin{align*}
-    x = -7.57416762700087 \\ 
-    y = 0.0158780881981559 \\
-    z =  5.13453514211295
-\end{align*}
-    This point could then represent the intersection point of the three planes given in the system of this exercise. \\
-    We notice that the values for the residual vector are extremely small, this indicates that the resulting 
-    vector X is very precise.
-
-    \subsubsection{Condition number of A}
+    In figure~\ref{fig:expgx}, we plot \( exp(g(x)) \) to find the approximating model for the original data points. We can now see the trend which the data
+    approximately follows.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree2}
+        \caption{model g(x) and log of the given data points}
+        \label{fig:expgx}
+    \end{figure}
+    
+    \subsubsection{Condition number of \(A\)}
+    We will calculate the condition number of matrix \(A\) to have some kind of measure for the accuracy of our solutions. The condition number
+    is not a direct representation of the accuracy of the solutions, but it plays a big role in it. A condition number with a high order of magniture
+    means that a small change in the input matrix \(A\) \emph{could} cause a significant change in the solutions, 
+    whereas the opposite counts for condition numbers with smaller orders of magnitude.\\
     To calculate the condition number of A, we will use the following definition: \[\kappa(A)= \frac{|max(S)|}{|min(S)|} \]
     where S is the vector of singular values of A. In GSL, we can find S by using gsl\_linalg\_SV\_decomp.
 \begin{lstlisting}
 gsl_linalg_SV_decomp(U, V, S, work);
-
 double condNumber, minS, maxS;
-minS = gsl_vector_get(S, 0); maxS = gsl_vector_get(S, 0);
-for (int j = 0; j < size_j; j++) {
+minS = gsl_vector_get(S, 0);
+maxS = gsl_vector_get(S, 0);
+for (int j = 0; j < n; j++) {
     if (gsl_vector_get(S, j) < minS) minS = gsl_vector_get(S, j);
     if (gsl_vector_get(S, j) > maxS) maxS = gsl_vector_get(S, j);
 }
 condNumber = fabs(maxS) / fabs(minS);
 \end{lstlisting}
-    After doing this, we can generate the following output:
-\begin{lstlisting}
-Vector S, singular values of A, result of doing SV decomposition:
-     13.7188626226398
-     6.13888725147292
-   0.0243650331438208
-
-Condition number = 13.7188626226398 / 0.0243650331438208 = 563.055364696643
-\end{lstlisting}
-    We get a condition number of about 563. Informally, we know that
-    \begin{quotation}
-    As a rule of thumb, if the condition number  \(\kappa(A) = 10^k\), 
-    then you may lose up to k digits of accuracy on top of what 
-    would be lost to the numerical method due to loss of precision 
-    from arithmetic methods.\footnote{https://en.wikipedia.org/wiki/Condition\_number}
-    \end{quotation}
-    This way, we can quickly estimate that with a condition number of 563 we \emph{may} lose approximately 
-    3 digits of accuracy (in the vector X) on top of the loss caused by machine precision.\\
+    After doing this, we find a condition number of about 8 (see section~\ref{sec:degree2}). 
+    Thus, we can conclude that our solution \[ \exp(g(x)) = \exp(2.10317965707954 - 0.403985459719526x) \]
+    is a pretty good approximation model for the given datapoints. However, if we look at the solution when we use higher degrees n, things become very
+    different.
     
-    Next, we will use the condition number and more formally describe the maximum inaccuracy 
-    which \emph{may} occur after these calculations.
+    \subsection{Higher degrees n}
+    \label{sec:higherdegrees}
+    In figures~\ref{fig:n4} and~\ref{fig:n7} the graphs for the models where \(n=4\) and \(n=7\) can be seen. We notice that the graphs seem to display
+    the trend which the data follows better than the case where \(n=2\). More specifically, they have minimized the sum of the squares
+    of the residuals better. We can confirm this by looking at the residual vector \(r = y - A\lambda\) in the output files in section~\ref{sec:output},
+    they decrease as n increases.
+    However, this comes at the cost of more processing power, since the matrix \(A\) increases in size as n increases. \\
+    \\
+    In the output files we can also see that the condition number becomes very large as n increases, up to around 6\mbox{\sc{e}}6 for \(n = 7\). 
+    This means that a small change in the input matrix \(A\) could cause significant changes in the results. This makes sense, because matrix \(A\) 
+    contains elements like \(x^n\), and these could multiply potential errors in the matrix by a big margin. \\
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree4}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree4}
+        \end{minipage}
+        \caption{Graphs for n = 4}
+        \label{fig:n4}
+    \end{figure}
     
-    \subsubsection{Maximum possible error}
-    We know the following inequalitíes which express that the maximum possible relative errors are bounded:
-    \[\frac{\mid\mid y - Ax\textsubscript{*} \mid\mid}{\mid\mid A \mid\mid \ \mid\mid x\textsubscript{*}\mid\mid} \leq \rho \epsilon,\ \ \ \ \ 
-    \frac{\mid\mid x - x\textsubscript{*} \mid\mid}{\mid\mid x\textsubscript{*} \mid\mid} \leq \rho \kappa(A) \epsilon \]
-    Here, \(\epsilon\) is the relative machine precision eps. For a double, 
-    this is \(2.22\mbox{\sc{e}-}16 \).\footnote{https://en.wikipedia.org/wiki/Machine\_epsilon\#Values\_for\_standard\_hardware\_floating\_point\_arithmetics}
-    If we take the approximately worst case for p, which is around 10, then we get that \(\rho \epsilon = 2.22\mbox{\sc{e}-}15 \)
-
-    \newpage
-    In the second formula, we see a better way to describe the impact that the condition number has on the
-    accuracy of the calculations for \(x\). For \(\rho \kappa(A) \epsilon\), we find:
-\begin{align*}
-    \rho \kappa(A) \epsilon \approx 10 * 563.055364696643 *2.22\mbox{\sc{e}-}16\\ 
-    \rho \kappa(A) \epsilon \approx 1.24998290962654746\mbox{\sc{e}-}12 \\
-    \rho \kappa(A) \epsilon \approx 1.25\mbox{\sc{e}-}12
-\end{align*}
-     We can now say that our result for \(x\) will have a maximal error of \(1.25\mbox{\sc{e}-}12\),
-     with respect to the exact solutions for \(x\).
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree7}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree7}
+        \end{minipage}
+        \caption{Graphs for n = 7}
+        \label{fig:n7}
+    \end{figure}
     
-    \subsection{Solving the system after changing a\textsubscript{2,2}}
-    In this section, we change a\textsubscript{2,2} from -4.273 to -4.275, and just repeat all of the steps.
-    The most important parts of the output are shown below.
-\begin{lstlisting}
-Vector X, result of solving with LU decomposition:
-    -7.57509282124123 
-   0.0157630382743384
-     5.13497563543488
-
-Vector r, residual of solving by LU decomposition:
- 9.58958990610966e-14
- 1.12524872037495e-14
--4.64732888184761e-14
-
-Condition number = 13.7190169534295 / 0.024538406356238 = 559.083452864162
-\end{lstlisting}
-    We notice that the condition number has decreased, which means the maximum inaccuracy that \emph{may}
-    occur also decreassed. We see this when calculating \(\rho \kappa(A) \epsilon\):
-\begin{align*}
-    \rho \kappa(A) \epsilon \approx 10 * 559.083452864162 *2.22\mbox{\sc{e}-}16\\ 
-    \rho \kappa(A) \epsilon \approx 1,241165265\mbox{\sc{e}-}12 \\
-    \rho \kappa(A) \epsilon \approx 1.24\mbox{\sc{e}-}12
-\end{align*}
-    Coincidentally, the residual vector \emph{increased} in this case, which means the calculated solution
-    for the system of equations became less accurate. \\
-    This can be interpreted graphically as the point in 3D space moving away from the intersection of
-    the three planes.\\
+    \subsection{Improving the solutions}
+    In order to get more reliable results, we will rescale the given datapoints to fit in the interval \([-1, 1]\). This will make the
+    values \(x^n\) in the matrix \(A\) much safer to use. To rescale the the points, we use the following formula:
+    \[x' = (b-a)\frac{x - \min(x_i)}{\max(x_i) - \min(x_i)} + a = (1+1)\frac{x - 0.635}{5.435 - 0.635} - 1 = \frac{2x - 1.27}{4.8} - 1 \]
+    In figures~\ref{fig:n2_r} and~\ref{fig:n7_r}, we see the the graphs after rescaling the points; they look exactly the same as before rescaling. 
+    If we examine the output of the program (sections \ref{sec:degree2_r} and further), we find that the condition number has indeed decreased.
+    It decreased from 7.9 to 1.5 for n = 2, and from around 6\mbox{\sc{e}}6 to 189.8, which is a much more favorable condition number to work with.
+    Another thing to note, is that the residual vectors also decreased after rescaling the data points.
     
-    Thus, we have found that changing a\textsubscript{2,2} from -4.273 to -4.275 has decreased the condition
-    number for the matrix, but increased the residual vector. This is perfectly possible, with the condition
-    number we can only make a statement about the maximum \emph{possible} error, we cannot say anything about
-    the actual error without knowing the exact solution.
-\section{Conclusion}
-    We have solved the given system of equations and found the following vector as a solution.
-\begin{lstlisting}
-Vector X, result of solving with LU decomposition:
-    -7.57509282124123
-   0.0157630382743384
-     5.13497563543488
-\end{lstlisting}
-    The maximum possible error of this vector X, with respect to the exact solutions for \(x\),
-    is approximately \(1.25\mbox{\sc{e}-}12\). \\
-    Graphically, this can be interpreted to be the point in 3D space, that is the intersection of three planes.\\
+    Thus, we can conclude that rescaling the data points to fit in the interval \([-1, 1]\) has indeed improved our results.
+    Another way to improve the results would be to use Legendre Polynomials as base functions instead of \( f_k(x) = x^k \), but they are not used
+    in these solutions.
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree2_rescaled}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree2_rescaled}
+        \end{minipage}
+        \caption{Graphs for n = 2}
+        \label{fig:n2_r}
+    \end{figure}
     
-    We have found that changing a\textsubscript{2,2} from -4.273 to -4.275 decreased the maximum possible error
-    to approximately \(1.24\mbox{\sc{e}-}12\). However, we noticed that the actual error of the vector X increased in this case.\\
-    Graphically, we can say that the point moved away from the intersection of the planes.
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree7_rescaled}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree7_rescaled}
+        \end{minipage}
+        \caption{Graphs for n = 7}
+        \label{fig:n7_r}
+    \end{figure}
 
 \onecolumn
 \appendix
@@ -263,12 +274,26 @@ Vector X, result of solving with LU decomposition:
 	\subsection{main.cpp}
 		\lstinputlisting[basicstyle=\scriptsize]{../main.cpp}
 	\bigskip
-	\subsection{createImages.sh}
-		\lstinputlisting[basicstyle=\scriptsize]{../createImages.sh}
+	\subsection{data\_smoothing.sh}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/data_smoothing.sh}
 
 \newpage
 \section{Output}
-	\subsection{output.txt}
-		%\lstinputlisting[basicstyle=\scriptsize]{../build/output.txt} 
+\label{sec:output}
+	\subsection{output\_degree2.txt}
+	\label{sec:degree2}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output/output_degree2.txt} 
+	\subsection{output\_degree4.txt}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output/output_degree4.txt} 
+	\subsection{output\_degree7.txt}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output/output_degree7.txt} 
+	\subsection{output\_degree2\_rescaled.txt}
+	\label{sec:degree2_r}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output/output_degree2_rescaled.txt} 
+	\subsection{output\_degree4\_rescaled.txt}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output/output_degree4_rescaled.txt} 
+	\subsection{output\_degree7\_rescaled.txt}
+	\label{sec:degree7_r}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output/output_degree7_rescaled.txt} 
 		
 \end{document}

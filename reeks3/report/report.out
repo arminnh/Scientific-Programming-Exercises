@@ -1,18 +1,19 @@
 \BOOKMARK [1][-]{section.1}{Problem}{}% 1
 \BOOKMARK [1][-]{section.2}{Using the program}{}% 2
-\BOOKMARK [1][-]{section.3}{Course of action}{}% 3
-\BOOKMARK [1][-]{section.4}{Solutions}{}% 4
-\BOOKMARK [2][-]{subsection.4.1}{Solving the first system of equations}{section.4}% 5
-\BOOKMARK [3][-]{subsubsection.4.1.1}{LU decomposition}{subsection.4.1}% 6
-\BOOKMARK [3][-]{subsubsection.4.1.2}{Solving the system}{subsection.4.1}% 7
-\BOOKMARK [3][-]{subsubsection.4.1.3}{Condition number of A}{subsection.4.1}% 8
-\BOOKMARK [3][-]{subsubsection.4.1.4}{Maximum possible error}{subsection.4.1}% 9
-\BOOKMARK [2][-]{subsection.4.2}{Solving the system after changing a2,2}{section.4}% 10
-\BOOKMARK [1][-]{section.5}{Conclusion}{}% 11
+\BOOKMARK [1][-]{section.3}{Solutions}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Datapoints plot}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Plot of log\(yi\)}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Setting up the system of equations}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.4}{QR factorization}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.5}{Results}{section.3}% 8
+\BOOKMARK [3][-]{subsubsection.3.5.1}{Condition number of A}{subsection.3.5}% 9
+\BOOKMARK [2][-]{subsection.3.6}{Higher degrees n}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.7}{Improving the solutions}{section.3}% 11
 \BOOKMARK [1][-]{section*.2}{Appendices}{}% 12
 \BOOKMARK [1][-]{appendix.A}{Code}{}% 13
 \BOOKMARK [2][-]{subsection.A.1}{main.cpp}{appendix.A}% 14
-\BOOKMARK [2][-]{subsection.A.2}{functions.h}{appendix.A}% 15
-\BOOKMARK [2][-]{subsection.A.3}{functions.cpp}{appendix.A}% 16
-\BOOKMARK [1][-]{appendix.B}{Output}{}% 17
-\BOOKMARK [2][-]{subsection.B.1}{output.txt}{appendix.B}% 18
+\BOOKMARK [2][-]{subsection.A.2}{createImages.sh}{appendix.A}% 15
+\BOOKMARK [1][-]{appendix.B}{Output}{}% 16
+\BOOKMARK [2][-]{subsection.B.1}{output\137degree2.txt}{appendix.B}% 17
+\BOOKMARK [2][-]{subsection.B.2}{output\137degree4.txt}{appendix.B}% 18
+\BOOKMARK [2][-]{subsection.B.3}{output\137degree7.txt}{appendix.B}% 19
