@@ -49,7 +49,7 @@ int main (int argc, char *argv[]) {
      *  f(x) = y | 7.50  4.35  2.97  2.20  1.70  1.28  1.00
      */
     double xa1[size] = {0.635, 1.435, 2.235, 3.035, 3.835, 4.635, 5.435},
-            ya1[size] = {7.50, 4.35, 2.97, 2.20, 1.70, 1.28, 1.00};
+            ya1[size] ={7.50, 4.35, 2.97, 2.20, 1.70, 1.28, 1.00};
 
     //points for model g(x) for log(y(x))
     double ya2[size];
@@ -77,9 +77,9 @@ int main (int argc, char *argv[]) {
     }
 
     //Mark the following points on the graph with a plus sign
-    datapoints << "#m=0,S=3\n";
+    datapoints     << "#m=0,S=3\n";
     log_datapoints << "#m=0,S=3\n";
-    gx << "#m=0,S=3\n";
+    gx     << "#m=0,S=3\n";
     exp_gx << "#m=0,S=3\n";
 
     //Output given data points to files
@@ -125,7 +125,7 @@ int main (int argc, char *argv[]) {
     printVector(R, "residual R = y - Ax", output);
 
     //Connect the following data points with a line
-    gx << "#m=1,S=0\n";
+    gx     << "#m=1,S=0\n";
     exp_gx << "#m=1,S=0\n";
 
     //Write new data points to files
@@ -134,11 +134,15 @@ int main (int argc, char *argv[]) {
         leftLimit = -1;
         rightLimit = 1;
     }
+
+    //Calculate new values for the graphs
     for (double x = leftLimit; x < rightLimit; x = x + 0.01) {
-        double y = 0;
-        for (int i = 0; i < n; i++) {
-            y += gsl_vector_get(X, i) * gsl_pow_int(x, i);
+        double y = gsl_vector_get(X, n-1);
+        //Use horners method to calculate the y values
+        for (int i = n-1; i > 0; i--) {
+            y = y*x + gsl_vector_get(X, i-1);
         }
+
         gx     << x << " " << y      << std::endl;
         exp_gx << x << " " << exp(y) << std::endl;
     }

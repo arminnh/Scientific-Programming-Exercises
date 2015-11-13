@@ -8,12 +8,15 @@
 \contentsline {subsection}{\numberline {3.5}Results}{5}{subsection.3.5}
 \contentsline {subsubsection}{\numberline {3.5.1}Condition number of \(A\)}{7}{subsubsection.3.5.1}
 \contentsline {subsection}{\numberline {3.6}Higher degrees n}{7}{subsection.3.6}
-\contentsline {subsection}{\numberline {3.7}Improving the solutions}{7}{subsection.3.7}
-\contentsline {section}{Appendices}{8}{section*.2}
-\contentsline {section}{\numberline {A}Code}{8}{appendix.A}
-\contentsline {subsection}{\numberline {A.1}main.cpp}{8}{subsection.A.1}
-\contentsline {subsection}{\numberline {A.2}createImages.sh}{10}{subsection.A.2}
-\contentsline {section}{\numberline {B}Output}{12}{appendix.B}
-\contentsline {subsection}{\numberline {B.1}output\_degree2.txt}{12}{subsection.B.1}
-\contentsline {subsection}{\numberline {B.2}output\_degree4.txt}{12}{subsection.B.2}
-\contentsline {subsection}{\numberline {B.3}output\_degree7.txt}{13}{subsection.B.3}
+\contentsline {subsection}{\numberline {3.7}Improving the solutions}{8}{subsection.3.7}
+\contentsline {section}{Appendices}{10}{section*.2}
+\contentsline {section}{\numberline {A}Code}{10}{appendix.A}
+\contentsline {subsection}{\numberline {A.1}main.cpp}{10}{subsection.A.1}
+\contentsline {subsection}{\numberline {A.2}data\_smoothing.sh}{13}{subsection.A.2}
+\contentsline {section}{\numberline {B}Output}{14}{appendix.B}
+\contentsline {subsection}{\numberline {B.1}output\_degree2.txt}{14}{subsection.B.1}
+\contentsline {subsection}{\numberline {B.2}output\_degree4.txt}{14}{subsection.B.2}
+\contentsline {subsection}{\numberline {B.3}output\_degree7.txt}{15}{subsection.B.3}
+\contentsline {subsection}{\numberline {B.4}output\_degree2\_rescaled.txt}{16}{subsection.B.4}
+\contentsline {subsection}{\numberline {B.5}output\_degree4\_rescaled.txt}{16}{subsection.B.5}
+\contentsline {subsection}{\numberline {B.6}output\_degree7\_rescaled.txt}{17}{subsection.B.6}

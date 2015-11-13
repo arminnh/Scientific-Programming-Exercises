@@ -65,7 +65,7 @@
 \bigskip
 \section{Using the program}
     All of the C++ code for the program can be found in the main.cpp and in appendix A of this document.
-    main.cpp comes accompanied by \mbox{createImages.sh}, which contains all of the necessary UNIX commands to generate the graph images.
+    main.cpp comes accompanied by \mbox{data\_smoothing.sh}, which contains all of the necessary UNIX commands to generate the graph images.
     This file relies on the \href{https://www.gnu.org/software/plotutils/manual/en/html_node/graph.html}{graph} program
     in the GNU plotutils package to plot graphs, so make sure that it is installed.
 
@@ -110,6 +110,8 @@ chmod +x ./data_smoothing.sh
     model. We then then get
     \[ \lambda_1 f_1(x_i) + \lambda_2 f_2(x_i) = y_i \]
     and can start constructing the overdetermined system of equations we will use to find the approximating model.
+    
+    \newpage
     \subsection{Setting up the system of equations}
     Now that we have a base function, we can fill in the system \( A\lambda = y \) we will work with. The system looks like this:
     \[
@@ -127,13 +129,14 @@ gsl_vector *Y = gsl_vector_alloc(size);
 
 for (int i = 0; i < size; i++) {    //size = amount of points
     for (int j = 0; j < n; j++) {   //n = 2
-        gsl_matrix_set(A, i, j, baseFunction(xa1[i], j));
+        gsl_matrix_set(A, i, j, gsl_pow_int(xa1[i], j));
     }
     gsl_vector_set(Y, i, ya2[i]);
 }
 \end{lstlisting}
     Later, we will also construct the system with higher values for n (which we will call the degree) to see what happens to the approximation.
 
+    \bigskip
     \subsection{QR factorization}
     Since the system \(A \lambda = y \) is overdetermined, we cannot solve it exactly, so we will find the least squares solution for it. 
     The least squares solution will minimize the Euclidean norm of the residual, \(||A\lambda - y||\). \\
@@ -146,34 +149,37 @@ gsl_linalg_QR_decomp(QR, tau);
 gsl_linalg_QR_lssolve(QR, tau, Y, X, R);
 \end{lstlisting}
 
+    \newpage
     \subsection{Results}
     We get the following solution for the system:
 \begin{lstlisting}
+Vector X, solution found by solving after QR decomposition:
  2.10317965707954
 -0.403985459719526
 \end{lstlisting}
-    These are the coefficients for the model \(g(x)\) for the points \((x_i, \log(y_i)) \). \\
-    Thus, we have found that \( g(x) = 2.10317965707954 - 0.403985459719526x\).
-    The graph for g(x) along with the points \((x_i, \log(y_i)) \) can be seen in figure~\ref{fig:gxlogdata}.
+    These are the coefficients of the model \(g(x)\) for the points \((x_i, \log(y_i)) \). \\
+    Thus, we have found that \[ g(x) = 2.10317965707954 - 0.403985459719526x\]
+    The graph for g(x) along with the points \((x_i, \log(y_i)) \) can be seen on the left side in figure~\ref{fig:results}.
     \begin{figure}[H]
-        \centering
-        \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree2}
-        \caption{model g(x) and log of the given data points}
-        \label{fig:gxlogdata}
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree2}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree2}
+        \end{minipage}
+        \caption{The resulting models}
+        \label{fig:results}
     \end{figure}
     
-    In figure~\ref{fig:expgx}, we plot \( exp(g(x)) \) to find the approximating model for the original data points. We can now see the trend which the data
-    approximately follows.
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=9cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/exp_gx_degree2}
-        \caption{model g(x) and log of the given data points}
-        \label{fig:expgx}
-    \end{figure}
-    
+    Now that we have the model \(g(x)\), we can create an approximating model for the original data points.
+    On the right side in figure~\ref{fig:results}, we plot \( exp(g(x)) \) to find that model. \\
+    We now have what we were looking for: we can see the trend which the original data approximately follows. However, the experiment does not end here.
+   
+    \newpage
     \subsubsection{Condition number of \(A\)}
-    We will calculate the condition number of matrix \(A\) to have some kind of measure for the accuracy of our solutions. The condition number
-    is not a direct representation of the accuracy of the solutions, but it plays a big role in it. A condition number with a high order of magniture
+    We will calculate the condition number of matrix \(A\) to have some kind of measure for the accuracy of our solutions. Keep in mind, the condition number
+    is not a direct representation of the accuracy of the solutions, but it plays a big role in it. A condition number with a high order of magnitude
     means that a small change in the input matrix \(A\) \emph{could} cause a significant change in the solutions, 
     whereas the opposite counts for condition numbers with smaller orders of magnitude.\\
     To calculate the condition number of A, we will use the following definition: \[\kappa(A)= \frac{|max(S)|}{|min(S)|} \]
@@ -189,22 +195,20 @@ for (int j = 0; j < n; j++) {
 }
 condNumber = fabs(maxS) / fabs(minS);
 \end{lstlisting}
-    After doing this, we find a condition number of about 8 (see section~\ref{sec:degree2}). 
+    After doing this, we find a condition number of about 8 (see appendix~\ref{sec:degree2}). 
     Thus, we can conclude that our solution \[ \exp(g(x)) = \exp(2.10317965707954 - 0.403985459719526x) \]
-    is a pretty good approximation model for the given datapoints. However, if we look at the solution when we use higher degrees n, things become very
-    different.
+    is a pretty accurate approximation model for the given datapoints if we choose n to be 2. 
+    However, if we look at the solution when we use higher degrees n, things become very different.
     
     \subsection{Higher degrees n}
     \label{sec:higherdegrees}
-    In figures~\ref{fig:n4} and~\ref{fig:n7} the graphs for the models where \(n=4\) and \(n=7\) can be seen. We notice that the graphs seem to display
+    In figures~\ref{fig:n4} and~\ref{fig:n7} the graphs for the models where \(n=4\) and \(n=7\) can be seen. The coefficients used to calculate points for 
+    the graphs can be seen in vector X in the output files in appendix~\ref{sec:output}. We notice that the graphs seem to display
     the trend which the data follows better than the case where \(n=2\). More specifically, they have minimized the sum of the squares
-    of the residuals better. We can confirm this by looking at the residual vector \(r = y - A\lambda\) in the output files in section~\ref{sec:output},
+    of the residuals better. We can confirm this by looking at the residual vector \(r = y - A\lambda\) in the output files,
     they decrease as n increases.
-    However, this comes at the cost of more processing power, since the matrix \(A\) increases in size as n increases. \\
-    \\
-    In the output files we can also see that the condition number becomes very large as n increases, up to around 6\mbox{\sc{e}}6 for \(n = 7\). 
-    This means that a small change in the input matrix \(A\) could cause significant changes in the results. This makes sense, because matrix \(A\) 
-    contains elements like \(x^n\), and these could multiply potential errors in the matrix by a big margin. \\
+    However, this comes at the cost of more processing power, since the matrix \(A\) increases in size as n increases.
+    \newpage
     \begin{figure}[H]
         \begin{minipage}[b]{0.49\textwidth}
             \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/gx_degree4}
@@ -228,14 +232,18 @@ condNumber = fabs(maxS) / fabs(minS);
         \caption{Graphs for n = 7}
         \label{fig:n7}
     \end{figure}
+    In the output files, we can also see that the condition number becomes very large as n increases, up to around 6\mbox{\sc{e}}6 for \(n = 7\). 
+    This means that a small change in the input matrix \(A\) could cause significant changes in the results. This makes sense, because matrix \(A\) 
+    contains elements like \(x^n\), and these could multiply potential errors in the matrix by a big margin.
     
     \subsection{Improving the solutions}
     In order to get more reliable results, we will rescale the given datapoints to fit in the interval \([-1, 1]\). This will make the
     values \(x^n\) in the matrix \(A\) much safer to use. To rescale the the points, we use the following formula:
     \[x' = (b-a)\frac{x - \min(x_i)}{\max(x_i) - \min(x_i)} + a = (1+1)\frac{x - 0.635}{5.435 - 0.635} - 1 = \frac{2x - 1.27}{4.8} - 1 \]
     In figures~\ref{fig:n2_r} and~\ref{fig:n7_r}, we see the the graphs after rescaling the points; they look exactly the same as before rescaling. 
-    If we examine the output of the program (sections \ref{sec:degree2_r} and further), we find that the condition number has indeed decreased.
-    It decreased from 7.9 to 1.5 for n = 2, and from around 6\mbox{\sc{e}}6 to 189.8, which is a much more favorable condition number to work with.
+    If we examine the output of the program (appendices \ref{sec:degree2_r} and further), we find that the condition number has indeed decreased.
+    It decreased from 7.9 to 1.5 for \(n = 2\), from 842.5 to 6.8 for \(n = 4\), and from around 6\mbox{\sc{e}}6 to 189.8 for \(n=7\).
+    The condition numbers after rescaling are much more favorable to work with.
     Another thing to note, is that the residual vectors also decreased after rescaling the data points.
     
     Thus, we can conclude that rescaling the data points to fit in the interval \([-1, 1]\) has indeed improved our results.

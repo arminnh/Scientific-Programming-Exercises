@@ -12,8 +12,11 @@
 \BOOKMARK [1][-]{section*.2}{Appendices}{}% 12
 \BOOKMARK [1][-]{appendix.A}{Code}{}% 13
 \BOOKMARK [2][-]{subsection.A.1}{main.cpp}{appendix.A}% 14
-\BOOKMARK [2][-]{subsection.A.2}{createImages.sh}{appendix.A}% 15
+\BOOKMARK [2][-]{subsection.A.2}{data\137smoothing.sh}{appendix.A}% 15
 \BOOKMARK [1][-]{appendix.B}{Output}{}% 16
 \BOOKMARK [2][-]{subsection.B.1}{output\137degree2.txt}{appendix.B}% 17
 \BOOKMARK [2][-]{subsection.B.2}{output\137degree4.txt}{appendix.B}% 18
 \BOOKMARK [2][-]{subsection.B.3}{output\137degree7.txt}{appendix.B}% 19
+\BOOKMARK [2][-]{subsection.B.4}{output\137degree2\137rescaled.txt}{appendix.B}% 20
+\BOOKMARK [2][-]{subsection.B.5}{output\137degree4\137rescaled.txt}{appendix.B}% 21
+\BOOKMARK [2][-]{subsection.B.6}{output\137degree7\137rescaled.txt}{appendix.B}% 22

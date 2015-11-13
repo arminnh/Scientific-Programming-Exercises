@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.10.3)  12 NOV 2015 19:38
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.10.3)  13 NOV 2015 10:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -445,7 +445,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 56--59
  []
 
 
-Overfull \hbox (4.56326pt too wide) in paragraph at lines 67--71
+Overfull \hbox (17.5999pt too wide) in paragraph at lines 67--71
 \OT1/cmr/m/n/10.95 pendix A of this doc-u-ment. main.cpp comes ac-com-pa-nied b
 y [],
  []
@@ -525,17 +525,146 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 [6 <../build/images/gx_degree2.png (PNG copy)> <../build/images/exp_gx_degree2.
 png (PNG copy)>]
-Overfull \hbox (15.17792pt too wide) in paragraph at lines 191--192
-\OT1/cmr/m/n/10.95 After do-ing this, we find a con-di-tion num-ber of about 8 
-(see out-put[]degree2.txt).
+
+LaTeX Warning: Reference `sec:degree2' on page 7 undefined on input line 192.
+
+
+LaTeX Warning: Reference `fig:n4' on page 7 undefined on input line 199.
+
+
+LaTeX Warning: Reference `fig:n7' on page 7 undefined on input line 199.
+
+
+LaTeX Warning: Reference `sec:output' on page 7 undefined on input line 201.
+
+<../build/images/gx_degree4.png, id=186, 823.075pt x 823.075pt>
+File: ../build/images/gx_degree4.png Graphic file (type png)
+
+<use ../build/images/gx_degree4.png>
+Package pdftex.def Info: ../build/images/gx_degree4.png used on input line 210.
+
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 210--211
+[][] 
  []
 
-[7]
+<../build/images/exp_gx_degree4.png, id=188, 823.075pt x 823.075pt>
+File: ../build/images/exp_gx_degree4.png Graphic file (type png)
+
+<use ../build/images/exp_gx_degree4.png>
+Package pdftex.def Info: ../build/images/exp_gx_degree4.png used on input line 
+214.
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 214--215
+[][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--218
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--218
+
+ []
+
+[7] <../build/images/gx_degree7.png, id=205, 823.075pt x 823.075pt>
+File: ../build/images/gx_degree7.png Graphic file (type png)
+
+<use ../build/images/gx_degree7.png>
+Package pdftex.def Info: ../build/images/gx_degree7.png used on input line 222.
+
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 222--223
+[][] 
+ []
+
+<../build/images/exp_gx_degree7.png, id=207, 823.075pt x 823.075pt>
+File: ../build/images/exp_gx_degree7.png Graphic file (type png)
+
+<use ../build/images/exp_gx_degree7.png>
+Package pdftex.def Info: ../build/images/exp_gx_degree7.png used on input line 
+226.
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 226--227
+[][] 
+ []
+
+
+LaTeX Warning: Reference `fig:n2_r' on page 8 undefined on input line 236.
+
+
+LaTeX Warning: Reference `fig:n7_r' on page 8 undefined on input line 236.
+
+
+LaTeX Warning: Reference `sec:degree2_r' on page 8 undefined on input line 237.
+
+
+[8 <../build/images/gx_degree4.png (PNG copy)> <../build/images/exp_gx_degree4.
+png (PNG copy)> <../build/images/gx_degree7.png (PNG copy)> <../build/images/ex
+p_gx_degree7.png (PNG copy)>]
+<../build/images/gx_degree2_rescaled.png, id=219, 823.075pt x 823.075pt>
+File: ../build/images/gx_degree2_rescaled.png Graphic file (type png)
+
+<use ../build/images/gx_degree2_rescaled.png>
+Package pdftex.def Info: ../build/images/gx_degree2_rescaled.png used on input 
+line 246.
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 246--247
+[][] 
+ []
+
+<../build/images/exp_gx_degree2_rescaled.png, id=221, 823.075pt x 823.075pt>
+File: ../build/images/exp_gx_degree2_rescaled.png Graphic file (type png)
+
+<use ../build/images/exp_gx_degree2_rescaled.png>
+Package pdftex.def Info: ../build/images/exp_gx_degree2_rescaled.png used on in
+put line 250.
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 250--251
+[][] 
+ []
+
+<../build/images/gx_degree7_rescaled.png, id=223, 823.075pt x 823.075pt>
+File: ../build/images/gx_degree7_rescaled.png Graphic file (type png)
+
+<use ../build/images/gx_degree7_rescaled.png>
+Package pdftex.def Info: ../build/images/gx_degree7_rescaled.png used on input 
+line 258.
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 258--259
+[][] 
+ []
+
+<../build/images/exp_gx_degree7_rescaled.png, id=225, 823.075pt x 823.075pt>
+File: ../build/images/exp_gx_degree7_rescaled.png Graphic file (type png)
+
+<use ../build/images/exp_gx_degree7_rescaled.png>
+Package pdftex.def Info: ../build/images/exp_gx_degree7_rescaled.png used on in
+put line 262.
+(pdftex.def)             Requested size: 184.9429pt x 162.68765pt.
+
+Overfull \hbox (8.54092pt too wide) in paragraph at lines 262--263
+[][] 
+ []
+
+[9 <../build/images/gx_degree2_rescaled.png (PNG copy)> <../build/images/exp_gx
+_degree2_rescaled.png (PNG copy)> <../build/images/gx_degree7_rescaled.png (PNG
+ copy)> <../build/images/exp_gx_degree7_rescaled.png (PNG copy)>]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
-nput line 206.
+nput line 275.
  (../main.cpp
 LaTeX Font Info:    Try loading font information for OML+cmr on input line 1.
- (/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
@@ -547,30 +676,45 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 9.
- [8
+ [10
 
-] [9])
-(../build/data_smoothing.sh [10]) [11] (../build/output_degree2.txt)
-(../build/output_degree4.txt [12]) (../build/output_degree7.txt [13])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 220.
- [14]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 220.
+] [11] [12])
+(../build/data_smoothing.sh) [13] (../build/output/output_degree2.txt)
+(../build/output/output_degree4.txt [14]) (../build/output/output_degree7.txt
+[15]) (../build/output/output_degree2_rescaled.txt)
+(../build/output/output_degree4_rescaled.txt [16])
+(../build/output/output_degree7_rescaled.txt [17])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 299.
+ [18]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 299.
+ (./report.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 299.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 299.
 
-(./report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 220.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 220.
-Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: E2CB1102865B000D18F03F696A7BD0EC;1163.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 220.
+
+Package rerunfilecheck Warning: File `report.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `report.out':
+(rerunfilecheck)             Before: E2CB1102865B000D18F03F696A7BD0EC;1163
+(rerunfilecheck)             After:  831F7B91FD5F5483027E94E11DB63CE4;1420.
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 299.
  ) 
 Here is how much of TeX's memory you used:
- 9615 strings out of 495028
- 144590 string characters out of 6181497
+ 9792 strings out of 495028
+ 148322 string characters out of 6181497
  469207 words of memory out of 5000000
- 12316 multiletter control sequences out of 15000+600000
+ 12363 multiletter control sequences out of 15000+600000
  12266 words of font info for 44 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 36i,8n,58p,269b,1710s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,10n,58p,299b,1710s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/tex
@@ -584,10 +728,10 @@ onts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
 cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.
 pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></
 usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on report.pdf (15 pages, 224271 bytes).
+Output written on report.pdf (19 pages, 262210 bytes).
 PDF statistics:
- 673 PDF objects out of 1000 (max. 8388607)
- 627 compressed objects within 7 object streams
- 383 named destinations out of 1000 (max. 500000)
- 197 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 846 PDF objects out of 1000 (max. 8388607)
+ 779 compressed objects within 8 object streams
+ 495 named destinations out of 1000 (max. 500000)
+ 285 words of extra memory for PDF output out of 10000 (max. 10000000)
 
