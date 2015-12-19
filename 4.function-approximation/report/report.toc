@@ -1,0 +1,22 @@
+\contentsline {section}{\numberline {1}Problem}{2}{section.1}
+\contentsline {section}{\numberline {2}Using the program}{2}{section.2}
+\contentsline {section}{\numberline {3}Solutions}{3}{section.3}
+\contentsline {subsection}{\numberline {3.1}Datapoints plot}{3}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Plot of \(\qopname \relax o{log}(y_i)\)}{4}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Setting up the system of equations}{5}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}QR factorization}{5}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}Results}{6}{subsection.3.5}
+\contentsline {subsubsection}{\numberline {3.5.1}Condition number of \(A\)}{7}{subsubsection.3.5.1}
+\contentsline {subsection}{\numberline {3.6}Higher degrees n}{7}{subsection.3.6}
+\contentsline {subsection}{\numberline {3.7}Improving the solutions}{8}{subsection.3.7}
+\contentsline {section}{Appendices}{10}{section*.2}
+\contentsline {section}{\numberline {A}Code}{10}{appendix.A}
+\contentsline {subsection}{\numberline {A.1}main.cpp}{10}{subsection.A.1}
+\contentsline {subsection}{\numberline {A.2}data\_smoothing.sh}{13}{subsection.A.2}
+\contentsline {section}{\numberline {B}Output}{14}{appendix.B}
+\contentsline {subsection}{\numberline {B.1}output\_degree2.txt}{14}{subsection.B.1}
+\contentsline {subsection}{\numberline {B.2}output\_degree4.txt}{14}{subsection.B.2}
+\contentsline {subsection}{\numberline {B.3}output\_degree7.txt}{15}{subsection.B.3}
+\contentsline {subsection}{\numberline {B.4}output\_degree2\_rescaled.txt}{16}{subsection.B.4}
+\contentsline {subsection}{\numberline {B.5}output\_degree4\_rescaled.txt}{16}{subsection.B.5}
+\contentsline {subsection}{\numberline {B.6}output\_degree7\_rescaled.txt}{17}{subsection.B.6}

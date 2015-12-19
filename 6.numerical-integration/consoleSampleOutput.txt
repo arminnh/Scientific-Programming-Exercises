@@ -1,0 +1,35 @@
+Calculating area using a smaller rectangle
+Area: 0.753569, Number of points: 3975
+Area: 0.759656, Number of points: 7934
+Area: 0.741523, Number of points: 3267
+Area: 0.765329, Number of points: 6746
+Area: 0.769334, Number of points: 4977
+Area: 0.758072, Number of points: 2736
+Area: 0.756304, Number of points: 9016
+Area: 0.751566, Number of points: 3687
+Area: 0.762812, Number of points: 18832
+Area: 0.754261, Number of points: 2772
+Area: 0.744161, Number of points: 4885
+Area: 0.761588, Number of points: 9702
+Area: 0.759893, Number of points: 5978
+Area: 0.757709, Number of points: 25872
+Area: 0.775812, Number of points: 3340
+Average Area: 0.758106
+
+Calculating area using the given rectangle
+Area: 0.750862, Number of points: 8124
+Area: 0.770569, Number of points: 65536
+Area: 0.758506, Number of points: 601472
+Area: 0.773399, Number of points: 8120
+Area: 0.770863, Number of points: 4242
+Area: 0.763246, Number of points: 221056
+Area: 0.743337, Number of points: 51632
+Area: 0.77885,  Number of points: 11196
+Area: 0.745841, Number of points: 14668
+Area: 0.809414, Number of points: 3484
+Area: 0.763514, Number of points: 71040
+Area: 0.75474,  Number of points: 145984
+Area: 0.74328,  Number of points: 29464
+Area: 0.76558,  Number of points: 245696
+Area: 0.765242, Number of points: 44352
+Average Area: 0.763816
