@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.4)
 
-project(1)
+project(sys_lineq)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_SHARED_LINKER_FLAGS "-lgsl -lgslcblas -lm")

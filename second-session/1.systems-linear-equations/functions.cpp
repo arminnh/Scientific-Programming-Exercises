@@ -4,15 +4,14 @@
 #include <iomanip>
 #include <iostream>
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_matrix_double.h>
 
-const int printWidth = 5;
-const int printPrecision = 15;
+const int PRINT_WIDTH = 13;
+const int PRINT_PRECISION = 5;
 
 void printVector(const gsl_vector * v, std::string string) {
     std::cout << "Vector " << string << ":\n";
     for (unsigned int i = 0; i < v->size; i++) {
-        std::cout << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_vector_get(v, i) << "\n";
+        std::cout << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_vector_get(v, i) << "\n";
     }
     std::cout << "\n";
 }
@@ -20,7 +19,7 @@ void printVector(const gsl_vector * v, std::string string) {
 void printVector(const gsl_vector * v, std::string string, std::ostream &out) {
     out << "Vector " << string << ":\n";
     for (unsigned int i = 0; i < v->size; i++) {
-        out << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_vector_get(v, i) << "\n";
+        out << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_vector_get(v, i) << "\n";
     }
     out << "\n";
 }
@@ -29,8 +28,8 @@ void printVectorCoutAndFile(const gsl_vector * v, std::string string, std::ostre
     std::cout << "Vector " << string << ":\n";
     out << "Vector " << string << ":\n";
     for (unsigned int i = 0; i < v->size; i++) {
-        std::cout << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_vector_get(v, i) << "\n";
-        out << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_vector_get(v, i) << "\n";
+        std::cout << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_vector_get(v, i) << "\n";
+        out << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_vector_get(v, i) << "\n";
     }
     std::cout << "\n";
     out << "\n";
@@ -41,7 +40,7 @@ void printMatrix(const gsl_matrix *m, std::string string) {
 
     for (unsigned int i = 0; i < m->size1; i++) {
         for (unsigned int j = 0; j < m->size2; j++) {
-            std::cout << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_matrix_get(m, i, j);
+            std::cout << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_matrix_get(m, i, j);
         }
         std::cout << "\n";
     }
@@ -52,7 +51,7 @@ void printMatrix(const gsl_matrix *m, std::string string, std::ostream &out) {
     out << "Matrix " << string << ":\n";
     for (unsigned int i = 0; i < m->size1; i++) {
         for (unsigned int j = 0; j < m->size2; j++) {
-            out << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_matrix_get(m, i, j);
+            out << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_matrix_get(m, i, j);
         }
         out << "\n";
     }
@@ -64,8 +63,8 @@ void printMatrixCoutAndFile(const gsl_matrix *m, std::string string, std::ostrea
     out << "Matrix " << string << ":\n";
     for (unsigned int i = 0; i < m->size1; i++) {
         for (unsigned int j = 0; j < m->size2; j++) {
-            std::cout << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_matrix_get(m, i, j);
-            out << std::setw(printWidth) << std::setprecision(printPrecision) << gsl_matrix_get(m, i, j);
+            std::cout << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_matrix_get(m, i, j);
+            out << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_matrix_get(m, i, j);
         }
         std::cout << "\n";
         out << "\n";
@@ -75,18 +74,18 @@ void printMatrixCoutAndFile(const gsl_matrix *m, std::string string, std::ostrea
 }
 
 void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
-    size_t size_i, size_j;
-    size_i = A->size1; size_j = A->size2;
+    size_t size_i = A->size1;
+    size_t size_j = A->size2;
 
     //Initialize all the necessary matrices and vectors
     gsl_matrix *LU = gsl_matrix_alloc(size_i, size_j),
-            *U = gsl_matrix_alloc(size_i, size_j),
-            *V = gsl_matrix_alloc(size_j, size_j);
+               *U  = gsl_matrix_alloc(size_i, size_j),
+               *V  = gsl_matrix_alloc(size_j, size_j);
 
-    gsl_vector *X = gsl_vector_alloc(size_j),
-            *r = gsl_vector_alloc(size_j),
-            *S = gsl_vector_alloc(size_j),
-            *work = gsl_vector_alloc(size_j);
+    gsl_vector *X    = gsl_vector_alloc(size_j),
+               *r    = gsl_vector_alloc(size_j),
+               *S    = gsl_vector_alloc(size_j),
+               *work = gsl_vector_alloc(size_j);
 
     //gsl_permutation and pInt are necessary to do the LU decomposition
     gsl_permutation *P = gsl_permutation_alloc(size_i);
@@ -118,17 +117,17 @@ void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
     condNumber = fabs(maxS) / fabs(minS);
 
     //Write out all of the results
-    printMatrixCoutAndFile(A, "Input Matrix A", out);
-    printVectorCoutAndFile(Y, "Input Vector Y", out);
-    printMatrixCoutAndFile(LU,"LU, result of LU decomposition", out);
-    printVectorCoutAndFile(X, "X, result of solving with LU decomposition", out);
-    printVectorCoutAndFile(r, "r, residual of solving by LU decomposition", out);
-    printVectorCoutAndFile(S, "S, singular values of A, result of doing SV decomposition", out);
+    //printMatrixCoutAndFile(A,  "Input Matrix A", out);
+    //printVectorCoutAndFile(Y,  "Input Vector Y", out);
+    //printMatrixCoutAndFile(LU, "LU, result of LU decomposition", out);
+    //printVectorCoutAndFile(X,  "X, result of solving with LU decomposition", out);
+    //printVectorCoutAndFile(r,  "r, residual of solving by LU decomposition", out);
+    //printVectorCoutAndFile(S,  "S, singular values of A, result of doing SV decomposition", out);
 
-    std::cout << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
+    //std::cout << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
     std::cout << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n";
-    out << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
-    out << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n\n";
+    //out << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
+    //out << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n\n";
 
     //Free the memory
     gsl_matrix_free(LU); gsl_matrix_free(U); gsl_matrix_free(V);
