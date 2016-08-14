@@ -21,7 +21,7 @@ double formulaRight(double i, int n)
 }
 
 
-double checkValuesInFormula(int n, double i)
+double checkValuesInFormula(double i, int n)
 {
     double leftSide = 0, rightSide = 0;
     //i *= drand48()*100;
@@ -39,21 +39,12 @@ double checkValuesInFormula(int n, double i)
 
 void fillSystem(gsl_matrix* A, gsl_vector *Y, int n)
 {
-    //double i[15] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    //double i[15] = {1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.2, 1.3, 1.4, 1.5, 1.6};
-    //double i[15] = {1.73, 2.13, 3.56, 4.43, 5.987, 6.34, 7.456, 8.23, 9.11, 10, 11, 12, 13, 14, 15};
-    //double i[15] = {6.1, 3.2, 8.3, 5.4, 7.5, 4.6, 9.7, 2.8, 1.9, 10, 11, 12, 13, 14, 15};
-
     for (size_t row = 0; row < n; ++row) {
         for (size_t col = 0; col < n; ++col) {
             gsl_matrix_set(A, row, col, formulaLeft(row+1, col+1));
         }
         gsl_vector_set(Y, row, formulaRight(row+1, n));
-        //checkValuesInFormula(n, i[r-1]);
-
-        //double random_i = drand48()/100;
-        //fillRowLeft(A, r-1, matrix_size, random_i);
-        //fillRowRight(Y, r-1, matrix_size, random_i);
+        //checkValuesInFormula(row+1, n);
     }
 }
 
