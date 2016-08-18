@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <gsl/gsl_math.h>
-#include <gsl/gsl_deriv.h>
 #include <gsl/gsl_spline.h>
 #include <algorithm>
 #include <fstream>

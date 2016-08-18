@@ -7,8 +7,8 @@ set(CMAKE_SHARED_LINKER_FLAGS "-lgsl -lgslcblas -lm")
 set(CMAKE_EXE_LINKER_FLAGS "-lgsl -lgslcblas -lm")
 
 set(SOURCE_FILES main.cpp)
-add_executable(numerical_integration ${SOURCE_FILES})
-target_link_libraries(numerical_integration -lgsl -lgslcblas -lm)
+add_executable(numerical_integration.bin ${SOURCE_FILES})
+target_link_libraries(numerical_integration.bin -lgsl -lgslcblas -lm)
 
 #file(COPY "./createImages.sh" DESTINATION .)
 #MAKE_DIRECTORY(images)

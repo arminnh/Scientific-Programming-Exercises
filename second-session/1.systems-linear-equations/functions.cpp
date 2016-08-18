@@ -117,17 +117,17 @@ void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
     condNumber = fabs(maxS) / fabs(minS);
 
     //Write out all of the results
-    //printMatrixCoutAndFile(A,  "Input Matrix A", out);
-    //printVectorCoutAndFile(Y,  "Input Vector Y", out);
-    //printMatrixCoutAndFile(LU, "LU, result of LU decomposition", out);
-    //printVectorCoutAndFile(X,  "X, result of solving with LU decomposition", out);
-    //printVectorCoutAndFile(r,  "r, residual of solving by LU decomposition", out);
-    //printVectorCoutAndFile(S,  "S, singular values of A, result of doing SV decomposition", out);
+    printMatrixCoutAndFile(A,  "Input Matrix A", out);
+    printVectorCoutAndFile(Y,  "Input Vector Y", out);
+    printMatrixCoutAndFile(LU, "LU, result of LU decomposition", out);
+    printVectorCoutAndFile(X,  "X, result of solving with LU decomposition", out);
+    printVectorCoutAndFile(r,  "r, residual of solving by LU decomposition", out);
+    printVectorCoutAndFile(S,  "S, singular values of A, result of doing SV decomposition", out);
 
-    //std::cout << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
+    std::cout << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
     std::cout << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n";
-    //out << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
-    //out << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n\n";
+    out << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
+    out << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n\n";
 
     //Free the memory
     gsl_matrix_free(LU); gsl_matrix_free(U); gsl_matrix_free(V);
