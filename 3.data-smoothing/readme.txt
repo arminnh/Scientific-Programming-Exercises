@@ -1,7 +1,7 @@
 Compile and run the program from the build/ directory with:
     cmake ..
     make
-   chmod +x ./data_smoothing.sh
+    chmod +x ./data_smoothing.sh
     ./data_smoothing.sh
 
 Ouput will be generated in the output/ and images/ folders.
