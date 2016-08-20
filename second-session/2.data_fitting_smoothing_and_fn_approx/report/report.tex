@@ -1,0 +1,279 @@
+\documentclass[11pt, a4paper, titlepage, openright]{article}
+% \usepackage[options]{package}
+
+\title{\LARGE Scientific Programming \\ \normalsize Data Fitting Exercise 1}
+\author{Armin Halilovic - s0122210}
+\date{October 30, 2015}
+
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+%\floatstyle{boxed}
+\restylefloat{figure}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{mathtools}
+%\usepackage{titlesec}
+\usepackage[titletoc, title]{appendix}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[a4paper, total={6.5in, 9.5in}]{geometry}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=C++,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\footnotesize\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  showstringspaces=false
+}
+
+\begin{document}
+\input{title_page.tex}
+\onecolumn
+\tableofcontents
+\newpage
+%\twocolumn
+
+
+
+\section{Problem}
+    We are given data points \( (x_i, f_i), i = 0, ..., 20 \) with \( x_i = i - 10 \) and \( f_i = (-1)^1 \) and have to do the following:
+    \begin{enumerate}
+        \item Calculate a polynomial interpolant through the data
+        \item Calculate the natural cubic spline for the data
+        \item Calculate a least squares approximant
+        \item Calculate the trigonometric polynomial interpolant
+        \item Calculate a trigonometric least squares approximant
+    \end{enumerate}
+    All of this will be done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
+    In the solutions, we will briefly describe what we did with excerpts from the code, generate graphs using the interpolation and approximation methods and discuss the results.
+
+\section{Using the code}
+    All of the C++ code can be found in the "main.cpp" file and in appendix A of this document.
+    main.cpp comes accompanied by createImages.sh, which contains all of the necessary UNIX commands to generate the graph images.
+    This file relies on the \href{https://www.gnu.org/software/plotutils/manual/en/html_node/graph.html}{graph} program
+    in the GNU plotutils package to plot graphs, so make sure that it is installed.
+
+    To compile and run the program, execute the following commands in the build/ directory:
+    \begin{lstlisting}
+    cmake ..
+    make
+    chmod +x ./createImages.sh
+    ./data_fitting_smoothing_and_fn_approx.bin
+    \end{lstlisting}
+    All of the graphs should be present in the build/images/ directory. If they are not there, make createImages.sh
+    executable with "chmod +x" and run it to create them.
+
+\newpage
+\section{Solutions}
+
+\subsection{Polynomial interpolant}
+\label{sec:firstpoly}
+    We use Newton's divided differences interpolation to do the polynomial interpolation through the data. \\
+
+    To execute the interpolation, we need to initialize a couple of GSL structs.
+    \begin{lstlisting}
+    gsl_interp_accel *acc = gsl_interp_accel_alloc();
+    gsl_spline *interp_poly = gsl_spline_alloc(gsl_interp_polynomial, m);
+    gsl_spline_init(interp_poly, x_i, y_i, m);
+    \end{lstlisting}
+    The \href{https://www.gnu.org/software/gsl/manual/html_node/1D-Higher_002dlevel-Interface.html#g_t1D-Higher_002dlevel-Interface}
+    {gsl\_spline} functions do not mean we are working with splines, despite what their name may suggest.
+    They simply provide a higher level interface so that we can write less code later on. \\ The type of the interpolation
+    we will work with is passed into the gsl\_spline\_alloc function. In this case, gsl\_spline\_init  will
+    use gsl\_poly\_dd\_init to initialize the polynomial we will use. gsl\_poly\_dd\_init uses the Newton polynomial,
+    which is what we need to calculate new interpolation points. \\
+
+    Now, we can plot a graph.
+    \begin{lstlisting}
+    double interpValue;
+        gsl_interp_accel *acc = gsl_interp_accel_alloc();
+        for (double x = minArray(x_i, m); x <= maxArray(x_i, m); x += 0.001) {
+            interpValue = gsl_spline_eval(interp_poly, x, acc);
+            polynomialInterp << x << " " << interpValue << "\n";
+        }
+    \end{lstlisting}
+    The result of the interpolation can be seen in figure~\ref{fig:poly1}.
+    %Graphs showing the relative differences can be found in the .zip file this report came in, they are omitted here as they do not bring
+
+
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=9.25cm, trim={1cm, 4cm, 2cm, 3cm}, clip]{../build/images/polynomialInterp.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=9.25cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/polynomialInterp_zoomed_2.png}
+        \end{minipage}
+        \caption{Polynomial interpolation through the given data points. Zoomed in image on the right.}
+        \label{fig:poly1}
+    \end{figure}
+
+    The polynomial interpolant is of degree 20. We see that near the endpoints of the interpolation, the approximations
+    become very large values. This happens because of high degree of the polynomial together with the fact that
+    we are using equidistant points.
+    A way to improve this interpolation would be using Chebyshev nodes as the \( x_i \) points.
+    These points are spread out more towards the endpoints of the interval, which would reduce this extreme behaviour.
+
+\subsection{Natural cubic spline}
+    For natural cubic spline interpolation, the only difference in the code lies in the initialization of the
+    interpolation struct. We simply pass gsl\_interp\_cspline into gsl\_spline\_alloc instead of gsl\_interp\_polynomial
+    and plot the grap. The result is visible in figure~\ref{fig:spline1}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=10cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/cubicSpline.png}
+        \caption{Cubic spline interpolation through the given data points}
+        \label{fig:spline1}
+    \end{figure}
+    We get a much nicer result than the polynomial interpolation.
+    However, we see that near the end points the interpolation goes beyond -1.
+    This leads us to believe that for the given data, the end conditions of the cubic spline are not satisfied.
+
+\subsection{Least squares approximation}
+To get a least squares approximation, we find an optimal solution for the equation
+    \[ \lambda_1 f_1(x_i) + ... +  \lambda_n f_n(x_i) = y_i \ \ where \ \ i = 1,...,m \gg n \]
+where m stands for the amount of given data points and n for the amount of unknowns we want to calculate.
+This equation can be written as an overdetermined system of equations of the form \(A\lambda - y\).
+The system is constructed in the code as follows:
+\begin{lstlisting}
+gsl_matrix *A = gsl_matrix_alloc(size, n);
+gsl_vector *Y = gsl_vector_alloc(size);
+
+for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+        gsl_matrix_set(A, i, j, gsl_pow_int(x_rescaled[i], j));
+    }
+    gsl_vector_set(Y, i, y_i[i]);
+}
+\end{lstlisting}
+We note here that as basis function we used \( f_i(x) = x^i  \).
+
+\subsubsection{QR factorization}
+    Since the system \(A \lambda = y \) is overdetermined, we cannot solve it exactly, so we find the least squares solution for it.
+    The least squares solution will minimize the Euclidean norm of the residual, \(||A\lambda - y||\). \\
+    Before we do that, QR factorization is used to decompose the matrix \( A \) into a product \( A = QR \)
+    of an orthogonal matrix \(Q\) and an upper triangular matrix \(R\):
+\begin{lstlisting}
+gsl_linalg_QR_decomp(QR, tau);
+gsl_linalg_QR_lssolve(QR, tau, Y, X, R);
+\end{lstlisting}
+
+\subsection{Results}
+    We found the least squares solutions for the system for n = 2, 4, 7, 10, 15, 20 and 21. Detailed output of the solutions for the systems can be found in the output/ directory.
+    We show the graphs for these solutions here:
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_4.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_7.png}
+        \end{minipage}
+        \caption{Approximations for n = 4 and n = 7}
+        \label{fig:results1}
+    \end{figure}
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_10.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_15.png}
+        \end{minipage}
+       \caption{Approximations for n = 10 and n = 15}
+        \label{fig:results2}
+    \end{figure}
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_20_zoomed_out.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_20.png}
+        \end{minipage}
+        \caption{Approximation for n = 20. Zoomed in image on the right}
+        \label{fig:results3}
+    \end{figure}
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_21_zoomed_out.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/leastSquares_degree_21.png}
+        \end{minipage}
+        \caption{Approximation for n = 21. Zoomed in image on the right}
+        \label{fig:results4}
+    \end{figure}
+    Note that when n = 21, we get the same result as with the polynomial interpolation.
+    This happens because at n = 21 we are solving the same 21x21 system that the polynomial interpolation solves.
+    Thus, at n = 21 we are doing interpolation.
+
+\subsubsection{Condition number of \(A\)}
+    We calculate the condition number of \(A\) at each approximation to have some kind of measure for the accuracy of our solutions.
+    The condition number is not a direct representation of the accuracy of the solutions, but it plays a big role in it.
+    A condition number with a high order of magnitude means that a small change in the input matrix \(A\) \emph{could}
+    cause a significant change in the solutions, whereas the opposite counts for condition numbers with smaller orders of magnitude.\\
+    To calculate the condition number of A, we use the following definition: \[\kappa(A)= \frac{|max(S)|}{|min(S)|} \]
+    where S is the vector of singular values of A. In GSL, we can find S by using gsl\_linalg\_SV\_decomp.
+\begin{lstlisting}
+gsl_linalg_SV_decomp(U, V, S, work);
+double condNumber, minS, maxS;
+minS = gsl_vector_get(S, 0);
+maxS = gsl_vector_get(S, 0);
+for (int j = 0; j < n; j++) {
+    if (gsl_vector_get(S, j) < minS) minS = gsl_vector_get(S, j);
+    if (gsl_vector_get(S, j) > maxS) maxS = gsl_vector_get(S, j);
+}
+condNumber = fabs(maxS) / fabs(minS);
+\end{lstlisting}
+    We find following condition numbers for n = 2, 4, 7, 10, 15, 20 and 21
+\begin{lstlisting}
+
+\end{lstlisting}
+
+    Thus, we can conclude that our solution \[ \exp(g(x)) = \exp(2.10317965707954 - 0.403985459719526x) \]
+    is a pretty accurate approximation model for the given datapoints if we choose n to be 2.
+
+
+\subsubsection{Improvement of results}
+One way to improve our results and lower the condition number would be to use the Legendre polynomials as basis functions instead
+of \( f_i(x) = x^i  \), but that was not done in these solutions.
+\subsection{Trigonometric polynomial interpolant}
+Wat is het voordeel van equidistante punten te hebben?
+\subsection{Trigonometric least squares approximant}
+Kies je een oneven/even aantal termen
+
+\onecolumn
+\appendix
+\appendixpage
+\addappheadtotoc
+
+\section{main.cpp}
+    \lstinputlisting[basicstyle=\scriptsize]{../main.cpp}
+    \newpage
+
+\section{functions.h}
+    \lstinputlisting[basicstyle=\scriptsize]{../functions.h}
+
+\bigskip
+\section{functions.cpp}
+    \lstinputlisting[basicstyle=\scriptsize]{../functions.cpp}
+
+\section{createImages.sh}
+    \lstinputlisting[language=bash, basicstyle=\scriptsize]{../createImages.sh}
+
+\end{document}

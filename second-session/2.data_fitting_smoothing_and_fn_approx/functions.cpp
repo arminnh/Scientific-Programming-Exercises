@@ -13,14 +13,6 @@
 const int PRINT_WIDTH = 13;
 const int PRINT_PRECISION = 5;
 
-void printVector(const gsl_vector * v, std::string string) {
-    std::cout << "Vector " << string << ":\n";
-    for (unsigned int i = 0; i < v->size; i++) {
-        std::cout << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_vector_get(v, i) << "\n";
-    }
-    std::cout << "\n";
-}
-
 void printVector(const gsl_vector * v, std::string string, std::ostream &out) {
     out << "Vector " << string << ":\n";
     for (unsigned int i = 0; i < v->size; i++) {
@@ -38,18 +30,6 @@ void printVectorCoutAndFile(const gsl_vector * v, std::string string, std::ostre
     }
     std::cout << "\n";
     out << "\n";
-}
-
-void printMatrix(const gsl_matrix *m, std::string string) {
-    std::cout << "Matrix " << string << ":\n";
-
-    for (unsigned int i = 0; i < m->size1; i++) {
-        for (unsigned int j = 0; j < m->size2; j++) {
-            std::cout << std::setw(PRINT_WIDTH) << std::setprecision(PRINT_PRECISION) << gsl_matrix_get(m, i, j);
-        }
-        std::cout << "\n";
-    }
-    std::cout << "\n";
 }
 
 void printMatrix(const gsl_matrix *m, std::string string, std::ostream &out) {
@@ -115,18 +95,7 @@ int f(double i)
     return (int) pow(-1, i);
 }
 
-double legendre(int n, double x)
-{
-    if (n == 0) {
-        return 1;
-    } else if (n == 1) {
-        return x;
-    } else {
-        return (((2*(n-1)) + 1) / n) * x * legendre(n-1, x) - ((n-1) / n) * x * legendre(n-2, x);
-    }
-}
-
-// write given points to dataPoins.dat
+// write given points to dataPoints.dat
 void writeDataPoints(double *x_i, double *y_i, int m)
 {
     std::ofstream dataPoints;

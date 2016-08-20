@@ -1,4 +1,5 @@
 #include <iostream>
+#include "math.h"
 #include "./functions.h"
 
 int main (void) {
@@ -8,15 +9,15 @@ int main (void) {
     double a = minArray(x_i, m); // -10
     double b = maxArray(x_i, m); // 10
 
-    // write given points to dataPoins.dat
+    // write given points to dataPoints.dat
     writeDataPoints(x_i, y_i, m);
 
     // polynomial interpolation and spline interpolation
     polynomialAndSplineSolutions(m, x_i, y_i);
 
     // least squares approximations
-    int leastSquares[] = {3, 5, 10, 15, 20, 21};
-    for (int i = 0; i < 6; i++) {
+    int leastSquares[] = {2, 3, 4, 5, 7, 10, 15, 20, 21};
+    for (int i = 0; i < 9; i++) {
         leastSquaresApproximation(m, leastSquares[i], x_i, a, b, y_i);
     }
 
@@ -35,7 +36,7 @@ int main (void) {
     double ttt[] = {0 * (2*M_PI)/8, 1 * (2*M_PI)/8, 2 * (2*M_PI)/8, 3 * (2*M_PI)/8, 4 * (2*M_PI)/8, 5 * (2*M_PI)/8, 6 * (2*M_PI)/8, 7 * (2*M_PI)/8}, xxx[] = {1, 1, 1, 1, 0, 0, 0, 0};
     trigonometricApproximation(8, 2, ttt, 0, 2*M_PI, xxx);
     trigonometricApproximation(8, 4, ttt, 0, 2*M_PI, xxx);
-     */
+    */
 
     // create the images with the gsl plotutils graph application
     system("./createImages.sh");
