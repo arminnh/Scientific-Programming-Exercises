@@ -12,11 +12,14 @@ void printMatrix(const gsl_matrix *, std::string);
 void printMatrix(const gsl_matrix *, std::string, std::ostream &);
 void printMatrixCoutAndFile(const gsl_matrix *, std::string, std::ostream &);
 
-void fillFArrays(double *x_i, double *y_i, int n);
-void polynomialAndSplineSolutions(int m, double *x_i, double *y_i);
-void leastSquaresSolutions(int m, int n, double *x_i, double a, double b, double *y_i, bool rescale=false);
-
+void printArray(const double *x, const int m);
 double minArray(double *array, int n);
 double maxArray(double *array, int n);
+
+void writeDataPoints(double *x_i, double *y_i, int m);
+void fillFArrays(double *x_i, double *y_i, int m);
+void polynomialAndSplineSolutions(int m, double *x_i, double *y_i);
+void leastSquaresApproximation(int m, int n, double *x_i, double a, double b, double *y_i);
+void trigonometricApproximation(int n, int m, double *x_i, double a, double b, double *y_i);
 
 #endif //PROJECT_FUNCTIONS_H

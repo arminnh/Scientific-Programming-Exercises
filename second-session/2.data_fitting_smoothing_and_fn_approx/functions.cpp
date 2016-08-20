@@ -14,6 +14,7 @@
 #include <sstream>
 #include <gsl/gsl_sf_log.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_sf_trig.h>
 
 const int PRINT_WIDTH = 13;
 const int PRINT_PRECISION = 5;
@@ -83,9 +84,71 @@ void printMatrixCoutAndFile(const gsl_matrix *m, std::string string, std::ostrea
     out << "\n";
 }
 
-int f(int i)
+void printArray(const double *x, const int m) {
+    for (int i = 0; i < m; i++) {
+        std::cout << x[i];
+        if (i != m-1) std::cout << ", ";
+        else std::cout << std::endl;
+    }
+}
+
+double minArray(double *array, int n)
+{
+    size_t i;
+    double minimum = array[0];
+    for (i = 1; i < n; ++i) {
+        if (minimum > array[i]) {
+            minimum = array[i];
+        }
+    }
+    return minimum;
+}
+
+double maxArray(double *array, int n)
+{
+    size_t i;
+    double maximum = array[0];
+    for (i = 1; i < n; ++i) {
+        if (maximum < array[i]) {
+            maximum = array[i];
+        }
+    }
+    return maximum;
+}
+
+int f(double i)
 {
     return (int) pow(-1, i);
+}
+
+double legendre(int n, double x)
+{
+    if (n == 0) {
+        return 1;
+    } else if (n == 1) {
+        return x;
+    } else {
+        return (((2*(n-1)) + 1) / n) * x * legendre(n-1, x) - ((n-1) / n) * x * legendre(n-2, x);
+    }
+}
+
+// write given points to dataPoins.dat
+void writeDataPoints(double *x_i, double *y_i, int m)
+{
+    std::ofstream dataPoints;
+    dataPoints.open("images/dataPoints.dat");
+
+    if(!dataPoints.is_open()) {
+        std::cerr << "Could not open file 'dataPoints.dat', make sure the images folder exists" << std::endl;
+        return;
+    }
+
+    dataPoints << "#m=0,S=3\n";
+    for (int i = 0; i < m; i++) {
+        dataPoints << x_i[i] << " " << y_i[i] << "\n";
+    }
+
+    dataPoints.close();
 }
 
 void fillFArrays(double *x_i, double *y_i, int n)
@@ -96,30 +159,13 @@ void fillFArrays(double *x_i, double *y_i, int n)
     }
 }
 
-bool openFiles(std::ofstream &polynomialInterp, std::ofstream &cubicSpline, std::ofstream &leastSquares, std::ofstream &trigInterp, std::ofstream &trigLeastSquares)
-{
-    polynomialInterp.open("images/polynomialInterp.dat");
-    cubicSpline.open("images/cubicSpline.dat");
-    leastSquares.open("images/leastSquares.dat");
-    trigInterp.open("images/trigInterp.dat");
-    trigLeastSquares.open("images/trigLeastSquares.dat");
-
-    return true;
-}
-
-bool closeFiles(std::ofstream &polynomialInterp, std::ofstream &cubicSpline, std::ofstream &leastSquares, std::ofstream &trigInterp, std::ofstream &trigLeastSquares)
-{
-    polynomialInterp.close();
-    cubicSpline.close();
-    leastSquares.close();
-    trigInterp.close();
-    trigLeastSquares.close();
-}
-
 void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
 {
-    std::ofstream polynomialInterp, cubicSpline, leastSquares, trigInterp, trigLeastSquares;
-    if (!openFiles(polynomialInterp, cubicSpline, leastSquares, trigInterp, trigLeastSquares)) {
+    std::ofstream polynomialInterp, cubicSpline;
+    polynomialInterp.open("images/polynomialInterp.dat");
+    cubicSpline.open("images/cubicSpline.dat");
+
+    if (!polynomialInterp.is_open()) {
         return;
     }
 
@@ -137,8 +183,8 @@ void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
     // WRITE POINTS TO FILES
 
     // mark following points with a plus
-    polynomialInterp << "#m=0,S=2\n";
-    cubicSpline      << "#m=0,S=2\n";
+    polynomialInterp << "#m=0,S=3\n";
+    cubicSpline      << "#m=0,S=3\n";
     for (int i = 0; i < m; i++) {
         polynomialInterp << x_i[i] << " " << y_i[i] << std::endl;
         cubicSpline      << x_i[i] << " " << y_i[i] << std::endl;
@@ -150,7 +196,7 @@ void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
 
     double interpValue;
     gsl_interp_accel *acc = gsl_interp_accel_alloc();
-    for (double x = x_i[0]; x < x_i[m - 1]; x += 0.001) {
+    for (double x = minArray(x_i, m); x <= maxArray(x_i, m); x += 0.001) {
         interpValue = gsl_spline_eval(interp_poly, x, acc);
         polynomialInterp << x << " " << interpValue << "\n";
 
@@ -162,43 +208,35 @@ void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
     gsl_interp_accel_free(acc);
     gsl_spline_free(interp_poly);
     gsl_spline_free(interp_cspline);
-    closeFiles(polynomialInterp, cubicSpline, leastSquares, trigInterp, trigLeastSquares);
+    polynomialInterp.close();
+    cubicSpline.close();
 }
 
 // solve overdetermined matrix where m = amount of points, n = amount of unknowns, x_i = array of x values in [a, b], y_i = array of y values
-void leastSquaresSolutions(int m, int n, double *x_input, double a, double b, double *y_i, bool rescale)
+void leastSquaresApproximation(int m, int n, double *x_i, double a, double b, double *y_i)
 {
     std::stringstream ss; ss << n;
-    std::string scale = "";
 
-    double x_i[m];
-    // rescale the x values we will work with
+    double x_rescaled[m];
+    // rescale the x values we will work with from [a, b] to [-1, 1]
     for (int i = 0; i < m; i++) {
-        if (rescale) {
-            x_i[i] = ((1 - -1) * (x_input[i] - a) / (b - a)) - 1;
-        } else {
-            x_i[i] = x_input[i];
-        }
+        x_rescaled[i] = ((1 - -1) * (x_i[i] - a) / (b - a)) - 1;
     }
-
-    if (rescale) {
-        a = -1;
-        b = 1;
-        scale = "_rescaled";
-    }
+    a = -1;
+    b = 1;
 
     // files to write data points for graphs to
-    std::ofstream output, gx;
-    output.open("output/output_degree" + ss.str() + scale + ".txt");
-    gx.open("images/leastSquares" + ss.str() +  scale + ".dat");
+    std::ofstream output, approximation;
+    output.open("output/leastSquares_degree_" + ss.str() + ".txt");
+    approximation.open("images/leastSquares_degree_" + ss.str() + ".dat");
 
     if (!output.is_open()) {
-        std::cout << "Could not open file 'output.dat', make sure the output folder exists" << std::endl;
+        std::cout << "Could not open file 'leastSquares_degree_.txt', make sure the output folder exists" << std::endl;
         return;
     }
 
-    if (!gx.is_open()) {
-        std::cout << "Could not open file 'gx_degree" + ss.str() +  scale + ".dat', make sure the images folder exists" << std::endl;
+    if (!approximation.is_open()) {
+        std::cout << "Could not open file 'leastSquares_degree_" + ss.str() + ".dat', make sure the images folder exists" << std::endl;
         return;
     }
 
@@ -209,7 +247,7 @@ void leastSquaresSolutions(int m, int n, double *x_input, double a, double b, do
     // put the input data into matrix A and vector Y
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            gsl_matrix_set(A, i, j, gsl_pow_int(x_i[i], j));
+            gsl_matrix_set(A, i, j, gsl_pow_int(x_rescaled[i], j));
         }
         gsl_vector_set(Y, i, y_i[i]);
     }
@@ -236,26 +274,33 @@ void leastSquaresSolutions(int m, int n, double *x_input, double a, double b, do
     printVector(X, "X, solution found by solving after QR decomposition", output);
     printVector(R, "residual R = y - Ax", output);
 
+    // add following invisible points for better automatic graph generation
+    approximation << "#m=0,S=0\n";
+    approximation << 1.1  << " " << 1.1;
+    approximation << 1.1  << " " << -1.1;
+    approximation << -1.1 << " " << 1.1;
+    approximation << -1.1 << " " << -1.1;
+
     // mark the following points on the graph with a plus sign
-    gx << "#m=0,S=3\n";
+    approximation << "#m=0,S=3\n";
 
     // output given data points to files
     for (int i = 0; i < m; i++) {
-        gx << x_i[i] << " " << y_i[i] << std::endl;
+        approximation << x_rescaled[i] << " " << y_i[i] << std::endl;
     }
 
     // connect the following data points with a line
-    gx << "#m=1,S=0\n";
+    approximation << "#m=1,S=0\n";
 
     // calculate new values for the graphs
-    for (double x = a; x <= b; x = x + 0.01) {
+    for (double x = a; x <= b + 0.001; x = x + 0.001) {
         double y = gsl_vector_get(X, n-1);
         // use horners method to calculate the y values
         for (int i = n-1; i > 0; i--) {
             y = y*x + gsl_vector_get(X, i-1);
         }
 
-        gx << x << " " << y << std::endl;
+        approximation << x << " " << y << std::endl;
     }
 
     // the condition number we will use is max(S) / min(S)
@@ -283,29 +328,92 @@ void leastSquaresSolutions(int m, int n, double *x_input, double a, double b, do
     gsl_vector_free(S);
     gsl_vector_free(work);
     output.close();
-    gx.close();
+    approximation.close();
 }
 
-double minArray(double *array, int n)
-{
-    size_t i;
-    double minimum = array[0];
-    for (i = 1; i < n; ++i) {
-        if (minimum > array[i]) {
-            minimum = array[i];
-        }
+double fourrierCoefficient(int j, int n, double *t_i, double *x_i, bool a) {
+    double result = 0;
+
+    for (int k = 0; k < n; k++) {
+        result += x_i[k] * ((a) ? gsl_sf_cos(j * t_i[k]) : gsl_sf_sin(j * t_i[k]));
     }
-    return minimum;
+
+    result *= 2.0/(double) n;
+    return result;
 }
 
-double maxArray(double *array, int n)
-{
-    size_t i;
-    double maximum = array[0];
-    for (i = 1; i < n; ++i) {
-        if (maximum < array[i]) {
-            maximum = array[i];
+void fourrierSolve(int n, double *t_i, double *x_i, int m, std::ofstream &out) {
+    double coeff[2 * m + 1];
+    coeff[0] = fourrierCoefficient(0, n, t_i, x_i, true) / 2;
+
+    // generate coefficients
+    for (int i = 1; i <= m; i++) {
+        int j = 2 * i;
+        coeff[j-1] = fourrierCoefficient(i, n, t_i, x_i, true);
+        coeff[j]   = fourrierCoefficient(i, n, t_i, x_i, false);
+
+        // if n == 2m, divide last a coefficient by 2. last b coefficient will be 0
+        if (i == m and n == 2*m) {
+            coeff[j]  /= 2;
+            coeff[j+1] = 0;
         }
     }
-    return maximum;
+
+    // print out the  approximation function
+    std::cout << "f(x) = " << coeff[0] << " + " ;
+    for (int i = 1; i <= m; i++) {
+        int j = 2 * i;
+        std::cout << coeff[j-1] << "*cos(" << i << "x) + ";
+        std::cout << coeff[j]   << "*sin(" << i << "x)";
+        std::cout << ((i != m) ? " + " : "\n");
+    }
+
+    // generate approximated values
+    for (double x = 0; x < 2*M_PI + 0.001; x = x + 0.001) {
+        double y = coeff[0];
+        for (int i = 1; i <= m; i++) {
+            int j = 2 * i;
+            y += coeff[j-1] * gsl_sf_cos(i * x);
+            y += coeff[j]   * gsl_sf_sin(i * x);
+        }
+
+        out << x << " " << y << std::endl;
+    }
+}
+
+// n given points, equidistant points t_i, corresponding data values x_i
+void trigonometricApproximation(int n, int m, double *t_i, double a, double b, double *x_i) {
+    std::stringstream mm, nn;
+    mm << m;
+    nn << n;
+
+    std::ofstream out;
+    out.open("images/trigApprox_n_" + nn.str() + "_m_" + mm.str() + ".dat");
+    out << "#m=0,S=3\n";
+
+    double t_rescaled[n];
+    // rescaled value = (value - (old min)) * (new range)/(old range)) + (new min)
+    // new min = 0
+    double new_max;
+    if (b - a > 2 * M_PI) {
+        new_max = (n-1) * (2*M_PI / n);
+    } else {
+        new_max = 2*M_PI;
+    }
+    double range_multiplier = (new_max - 0) / (b - a); // (new range) / (old range)
+
+    for (int i = 0; i < n; i++) {
+        t_rescaled[i] = (t_i[i] - a) * range_multiplier;
+        out << t_rescaled[i]  << " "  << x_i[i] << std::endl;
+    }
+
+    std::cout << "n = " << n << " equidistant points as time values in [" << a << ", " << b << "] rescaled to [0 , 2pi]: \n\t";
+    printArray(t_rescaled, n);
+
+    out << "#m=1,S=0\n";
+    std::cout << "n = " << n << " approximation: \n\t";
+    fourrierSolve(n, t_rescaled, x_i, m, out);
+    std::cout <<  std::endl;
+
+    out.close();
 }
