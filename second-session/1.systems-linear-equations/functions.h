@@ -13,5 +13,6 @@ void printMatrix(const gsl_matrix *m, std::string string, std::ostream &);
 void printMatrixCoutAndFile(const gsl_matrix *m, std::string string, std::ostream &);
 
 void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &);
+void fillSystem(gsl_matrix* A, gsl_vector *Y, int n);
 
 #endif //PROJECT_FUNCTIONS_H

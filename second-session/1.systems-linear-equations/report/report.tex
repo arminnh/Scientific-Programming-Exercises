@@ -13,6 +13,8 @@
 \usepackage{fixltx2e}
 \usepackage[bottom]{footmisc}
 
+\usepackage[a4paper, total={6.5in, 9.5in}]{geometry}
+
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
@@ -35,7 +37,7 @@
   showstringspaces=false,
   keepspaces=true, 
   columns=flexible
-}
+  }
 
 \begin{document}
 \input{title_page.tex}
@@ -43,41 +45,51 @@
 \newpage
 
 \section{Problem}
-    We will solve the system of linear equations
+    We have to solve the system of linear equations
         \[
             \begin{aligned}
                 \sum_{j=1}^{n} (1+i)^{j-1} x_j = \frac{(1+i)^{n} - 1}{i}     && 1 \le i \le n
             \end{aligned}
         \]
     for \( n = 10, ..., 15 \) using Gauss-elimination with partial pivoting.
-    Then, we will calculate and discuss the condition number of the coeffient matrix of the linear system. \\
-    This will be done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
-    In section~\ref{sec:solutions}, the solution is reached, using \emph{only} the
+    Then, we calculate and discuss the results and the condition numbers of the coeffient matrices of the linear systems. \\
+    This is done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
+    In section~\ref{sec:solutions}, we explain how the solutions are reached, using \emph{only} the
     most important parts from our code. Some basic knowledge of GSL is assumed.
+\bigskip
+\bigskip
 
-    \[Ax = y\]
+\section{Using the program}
+    All of the C++ code for the program can be found in the main.cpp, functions.cpp and functions.h files, 
+    and in appendix A of this document. The output of the program is stored in output/output\_n\_*.txt. The output file for \(n=10\) can be found in appendix B.
 
+    To compile and run the program, execute the following commands in the build/ directory:
+\begin{lstlisting}
+cmake ..
+make
+./sys_lineq.bin
+\end{lstlisting}
+
+
+\newpage
+\section{Course of action}
+    The systems of linear equations have the form \(Ax = y\).
+    For example, if n = 10, we get:
     \[
         A =
         \begin{bmatrix}
             %(1+i)^{0} (1+i)^{1} (1+i)^{2} (1+i)^{3} (1+i)^{4} (1+i)^{5} (1+i)^{6} (1+i)^{7} (1+i)^{8} (1+i)^{9} (1+i)^{10} (1+i)^{11} (1+i)^{12} (1+i)^{13} (1+i)^{14}
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & 0 & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & (1+i)^{10} & 0 & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & (1+i)^{10} & (1+i)^{11} & 0 & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & (1+i)^{10} & (1+i)^{11} & (1+i)^{12} & 0 & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & (1+i)^{10} & (1+i)^{11} & (1+i)^{12} & (1+i)^{13} & 0 \\
-            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} & (1+i)^{10} & (1+i)^{11} & (1+i)^{12} & (1+i)^{13} & (1+i)^{14} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
+            (1+i)^{0} & (1+i)^{1} & ... & (1+i)^{9} \\
         \end{bmatrix}
-        \] \[
         x =
         \begin{bmatrix}
             \\
@@ -87,114 +99,97 @@
             . \\\\
             . \\\\
             . \\\\
-            x_{15} \\\\
+            x_{10} \\\\
         \end{bmatrix}
         \\
         y =
         \begin{bmatrix}
             \\
             \frac{(1+i)^{10} - 1}{i} \\\\
-            \frac{(1+i)^{11} - 1}{i} \\\\
-            \frac{(1+i)^{12} - 1}{i} \\\\
-            \frac{(1+i)^{13} - 1}{i} \\\\
-            \frac{(1+i)^{14} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
-            \frac{(1+i)^{15} - 1}{i} \\\\
+            \frac{(1+i)^{10} - 1}{i} \\\\
+            \frac{(1+i)^{10} - 1}{i} \\\\
+            . \\\\
+            . \\\\
+            . \\\\
+            \frac{(1+i)^{10} - 1}{i} \\\\
         \end{bmatrix}
     \]
-
-
-\bigskip
-\bigskip
-\section{Using the program}
-    All of the C++ code for the program can be found in the main.cpp, functions.cpp and functions.h files, 
-    and in appendix A of this document. The output of the program is in output.txt and in appendix B.
-
-    To compile and run the program, execute the following commands in the build/ directory:
-\begin{lstlisting}
-cmake ..
-make
-./sys_lineq
-\end{lstlisting}
-
-\newpage
-\section{Course of action}
-    What follows is a brief set of steps we will use to solve the exercise:
+    The i's in the systems can be chosen freely, as long as the constraint \( 1 \le i \le n \) holds true.
+    We choose the i's to be the row indices of the systems. \\
+    What follows is a brief set of steps we use to solve the matrices.
     \begin{enumerate}
         \item Load the input matrix A and vector Y.
         \item Find the LU decomposition of A.
+                    \subitem Gauss-elimination with partial pivoting happens here.
         \item Solve the system using the LU decomposition.
             \subitem Also, find the residual error vector.\footnote{We cannot find the error vector, since we do not have the exact solution for \(x\) in \(Ax = y\)}
         \item Calculate the condition number of the matrix.
-        \item Calculate the maximum possible error of the solution.
     \end{enumerate}
     
-\bigskip
+\newpage
 \section{Solutions}
 \label{sec:solutions}
-    \subsection{Solving the first system of equations}
-        Initializing all of the necessary structs and loading the input matrix and vector 
-        is a trivial task, so we will start at the LU decomposition step.
+    \subsection{Solution for n=10}
+        Initializing all of the necessary structs and loading the input matrix and vector
+        is a trivial task, so we start at the LU decomposition step.
     \subsubsection{LU decomposition}
-    We know that \(PA = LU\). GSL makes it very easy to find LU decompositions; gsl\_linalg\_LU\_decomp will find the LU 
-    decomposition by executing Gaussian Elimination with partial pivoting.
+    To find LU decompositions, we use gsl\_linalg\_LU\_decomp. This function makes use of Gaussian Elimination with partial pivoting to find the LU decompositions.
 \begin{lstlisting}
 gsl_matrix_memcpy(LU, A);
 gsl_linalg_LU_decomp(LU, P, &sigNum);
 \end{lstlisting}
-    gsl\_linalg\_LU\_decomp writes the result to its first argument, so we will copy A to a new matrix 
-    LU first, as we will need A later on. P will contain the permutation matrix, which is not relevant for 
-    this exercise. \\ This will result in the following output:
-    
-\begin{lstlisting}
-Matrix LU, result of LU decomposition:
-                5.084               -5.832                9.155
-    0.594217151848938     5.63947442958301     1.47294197482297
-     0.20279307631786   -0.547978507128854   0.0715699307609119
-     
-\end{lstlisting}
+    gsl\_linalg\_LU\_decomp writes the result to its first argument, so we copy A to a new matrix
+    LU first, as we need A later on. P contains the permutation matrix, which is not relevant for
+    this exercise. \\ The resulting matrix LU can be found in the output file for n = 10.
+
     \subsubsection{Solving the system}
     The code for this part is very straightforward:
 \begin{lstlisting}
 gsl_linalg_LU_solve(LU, P, Y, X);
 gsl_linalg_LU_refine(A, LU, P, Y, X, r);
 \end{lstlisting}
-    gsl\_linalg\_LU\_solve will use the LU decomposition and permutation matrix to solve the system of equations.
-    The solution for the system will be stored in X. gsl\_linalg\_LU\_refine is then used to find the residual vector r.\\
+    gsl\_linalg\_LU\_solve uses the LU decomposition and permutation matrix to solve the system of equations.
+    The solution for the system is stored in X. gsl\_linalg\_LU\_refine is then used to find the residual vector r.\\
     The residual vector is the vector r so that \[ r = y - Ax \] where \(y\) is known exactly and \(Ax\) is calculated. 
     
-    We will get the output:
+    We get the output:
 \begin{lstlisting}
 Vector X, result of solving with LU decomposition:
-    -7.57416762700087
-   0.0158780881981559
-     5.13453514211295
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            1
+            1
 
 Vector r, residual of solving by LU decomposition:
-  4.0146050319364e-14
-  4.8599800162611e-15
--1.95862184650587e-14
+   4.3321e-05
+  -8.1093e-05
+   6.4058e-05
+  -2.8163e-05
+   7.6338e-06
+  -1.3279e-06
+   1.4868e-07
+   -1.036e-08
+   4.0865e-10
+   -6.966e-12
 \end{lstlisting}
-    The vector X we have found here can be interpreted as a point in a 3D space, where, for example 
-\begin{align*}
-    x = -7.57416762700087 \\ 
-    y = 0.0158780881981559 \\
-    z =  5.13453514211295
-\end{align*}
-    This point could then represent the intersection point of the three planes given in the system of this exercise. \\
-    We notice that the values for the residual vector are extremely small, this indicates that the resulting 
-    vector X is very precise.
+    We notice that the values for the residual vector are very small, this indicates that the resulting
+    vector X is very precise. This does not necessarily mean that the solution to the system is exactly this vector.
+    However, if we check, we see that the formula
+    \[
+        \begin{aligned}
+            \sum_{j=1}^{n} (1+i)^{j-1} x_j = \frac{(1+i)^{n} - 1}{i}     && 1 \le i \le n
+        \end{aligned}
+    \]
+    indeed is true when all x\_j are 1.
 
     \subsubsection{Condition number of A}
-    To calculate the condition number of A, we will use the following definition: \[\kappa(A)= \frac{|max(S)|}{|min(S)|} \]
+    To calculate the condition number of A, we use the following definition: \[\kappa(A)= \frac{|max(S)|}{|min(S)|} \]
     where S is the vector of singular values of A. In GSL, we can find S by using gsl\_linalg\_SV\_decomp.
 \begin{lstlisting}
 gsl_linalg_SV_decomp(U, V, S, work);
@@ -207,94 +202,300 @@ for (int j = 0; j < size_j; j++) {
 }
 condNumber = fabs(maxS) / fabs(minS);
 \end{lstlisting}
-    After doing this, we can generate the following output:
+    We get the following output:
 \begin{lstlisting}
 Vector S, singular values of A, result of doing SV decomposition:
-     13.7188626226398
-     6.13888725147292
-   0.0243650331438208
+   2.6054e+09
+    1.225e+07
+   1.4309e+05
+       3220.7
+       130.72
+       9.8208
+       1.2767
+      0.13121
+    0.0059818
+   9.6998e-05
 
-Condition number = 13.7188626226398 / 0.0243650331438208 = 563.055364696643
+Condition number = 2.6054e+09 / 9.6998e-05 = 2.6861e+13
 \end{lstlisting}
-    We get a condition number of about 563. Informally, we know that
-    \begin{quotation}
-    As a rule of thumb, if the condition number  \(\kappa(A) = 10^k\), 
-    then you may lose up to k digits of accuracy on top of what 
-    would be lost to the numerical method due to loss of precision 
-    from arithmetic methods.\footnote{https://en.wikipedia.org/wiki/Condition\_number}
-    \end{quotation}
-    This way, we can quickly estimate that with a condition number of 563 we \emph{may} lose approximately 
-    3 digits of accuracy (in the vector X) on top of the loss caused by machine precision.\\
-    
-    Next, we will use the condition number and more formally describe the maximum inaccuracy 
-    which \emph{may} occur after these calculations.
-    
-    \subsubsection{Maximum possible error}
-    We know the following inequalitíes which express that the maximum possible relative errors are bounded:
-    \[\frac{\mid\mid y - Ax\textsubscript{*} \mid\mid}{\mid\mid A \mid\mid \ \mid\mid x\textsubscript{*}\mid\mid} \leq \rho \epsilon,\ \ \ \ \ 
-    \frac{\mid\mid x - x\textsubscript{*} \mid\mid}{\mid\mid x\textsubscript{*} \mid\mid} \leq \rho \kappa(A) \epsilon \]
-    Here, \(\epsilon\) is the relative machine precision eps. For a double, 
-    this is \(2.22\mbox{\sc{e}-}16 \).\footnote{https://en.wikipedia.org/wiki/Machine\_epsilon\#Values\_for\_standard\_hardware\_floating\_point\_arithmetics}
-    If we take the approximately worst case for p, which is around 10, then we get that \(\rho \epsilon = 2.22\mbox{\sc{e}-}15 \)
+    We get a condition number of about 2.7e+13. \\
+    Informally, we know that the larger the order of the condition number is, the larger the possible error (in the X vector) can be.
+    For very large condition numbers, a small pertubation in one of the matrix' cells could cause a large change in the results.
+    We test and compare the effect of small perturbations later on.
 
-    \newpage
-    In the second formula, we see a better way to describe the impact that the condition number has on the
-    accuracy of the calculations for \(x\). For \(\rho \kappa(A) \epsilon\), we find:
-\begin{align*}
-    \rho \kappa(A) \epsilon \approx 10 * 563.055364696643 *2.22\mbox{\sc{e}-}16\\ 
-    \rho \kappa(A) \epsilon \approx 1.24998290962654746\mbox{\sc{e}-}12 \\
-    \rho \kappa(A) \epsilon \approx 1.25\mbox{\sc{e}-}12
-\end{align*}
-     We can now say that our result for \(x\) will have a maximal error of \(1.25\mbox{\sc{e}-}12\),
-     with respect to the exact solutions for \(x\).
-    
-    \subsection{Solving the system after changing a\textsubscript{2,2}}
-    In this section, we change a\textsubscript{2,2} from -4.273 to -4.275, and just repeat all of the steps.
-    The most important parts of the output are shown below.
+%    Next, we use the condition number and more formally describe the maximum inaccuracy which \emph{can} occur after all of the calculations.
+%
+%    \subsubsection{Maximum possible error}
+%    We know the following inequalitíes which express that the maximum possible relative errors are bounded:
+%    \[\frac{\mid\mid y - Ax\textsubscript{*} \mid\mid}{\mid\mid A \mid\mid \ \mid\mid x\textsubscript{*}\mid\mid} \leq \rho \epsilon,\ \ \ \ \
+%    \frac{\mid\mid x - x\textsubscript{*} \mid\mid}{\mid\mid x\textsubscript{*} \mid\mid} \leq \rho \kappa(A) \epsilon \]
+%    Here, \(\epsilon\) is the relative machine precision eps. For a double,
+%    this is \(2.22\mbox{\sc{e}-}16 \).\footnote{https://en.wikipedia.org/wiki/Machine\_epsilon\#Values\_for\_standard\_hardware\_floating\_point\_arithmetics}
+%    If we take the approximately worst case for p, which is around 10, then we get that \(\rho \epsilon = 2.22\mbox{\sc{e}-}15 \)
+%
+%    In the second formula, we see a better way to describe the impact that the condition number has on the
+%    accuracy of the calculations for \(x\). For \(\rho \kappa(A) \epsilon\), we find:
+%\begin{align*}
+%    \rho \kappa(A) \epsilon \approx 10 * 2.69\mbox{\sc{e}+}13 * 2.22\mbox{\sc{e}-}16\\
+%    \rho \kappa(A) \epsilon \approx 2.69 * 2.22\mbox{\sc{e}-}2\\
+%    \rho \kappa(A) \epsilon \approx 5.97\mbox{\sc{e}-}2
+%\end{align*}
+%     We can now say that our result for \(x\) has a maximal error of \(5.97\mbox{\sc{e}-}2\),
+%     with respect to the exact solutions for \(x\).
+
+
+
+\subsection{Solution for n=11}
+    We get the following results
 \begin{lstlisting}
 Vector X, result of solving with LU decomposition:
-    -7.57509282124123 
-   0.0157630382743384
-     5.13497563543488
+        1.001
+      0.99808
+       1.0016
+       0.9992
+       1.0002
+      0.99995
+            1
+            1
+            1
+            1
+            1
 
 Vector r, residual of solving by LU decomposition:
- 9.58958990610966e-14
- 1.12524872037495e-14
--4.64732888184761e-14
+   -0.0013454
+    0.0027319
+   -0.0023955
+    0.0011972
+  -0.00037823
+   7.9061e-05
+  -1.1093e-05
+   1.0335e-06
+  -6.1298e-08
+   2.0934e-09
+   -3.131e-11
 
-Condition number = 13.7190169534295 / 0.024538406356238 = 559.083452864162
+Condition number = 6.8216e+10 / 4.1701e-05 = 1.6358e+15
 \end{lstlisting}
-    We notice that the condition number has decreased, which means the maximum inaccuracy that \emph{may}
-    occur also decreassed. We see this when calculating \(\rho \kappa(A) \epsilon\):
-\begin{align*}
-    \rho \kappa(A) \epsilon \approx 10 * 559.083452864162 *2.22\mbox{\sc{e}-}16\\ 
-    \rho \kappa(A) \epsilon \approx 1,241165265\mbox{\sc{e}-}12 \\
-    \rho \kappa(A) \epsilon \approx 1.24\mbox{\sc{e}-}12
-\end{align*}
-    Coincidentally, the residual vector \emph{increased} in this case, which means the calculated solution
-    for the system of equations became less accurate. \\
-    This can be interpreted graphically as the point in 3D space moving away from the intersection of
-    the three planes.\\
-    
-    Thus, we have found that changing a\textsubscript{2,2} from -4.273 to -4.275 has decreased the condition
-    number for the matrix, but increased the residual vector. This is perfectly possible, with the condition
-    number we can only make a statement about the maximum \emph{possible} error, we cannot say anything about
-    the actual error without knowing the exact solution.
-\section{Conclusion}
-    We have solved the given system of equations and found the following vector as a solution.
+    We notice that the condition number has increased, which means the possible error that \emph{may} occur also increased.
+    %We see this when calculating \(\rho \kappa(A) \epsilon\):
+    %\begin{align*}
+    %    \rho \kappa(A) \epsilon \approx 10 * 1.64\mbox{\sc{e}+}15 * 2.22\mbox{\sc{e}-}16\\
+    %    \rho \kappa(A) \epsilon \approx 1.64 * 2.22\\
+    %    \rho \kappa(A) \epsilon \approx 3.64
+    %\end{align*}
+
+
+\subsection{Solution for n=12}
+    We get the following results
 \begin{lstlisting}
 Vector X, result of solving with LU decomposition:
-    -7.57509282124123
-   0.0157630382743384
-     5.13497563543488
+      0.97184
+       1.0587
+      0.94665
+        1.028
+      0.99058
+       1.0021
+      0.99966
+            1
+            1
+            1
+            1
+            1
+
+Vector r, residual of solving by LU decomposition:
+     0.065446
+     -0.13345
+      0.11782
+    -0.059773
+     0.019457
+   -0.0042842
+   0.00065322
+  -6.9152e-05
+   4.9923e-06
+  -2.3452e-07
+    6.462e-09
+  -7.9229e-11
+
+Condition number = 1.9698e+12 / 1.1463e-05 = 1.7184e+17
 \end{lstlisting}
-    The maximum possible error of this vector X, with respect to the exact solutions for \(x\),
-    is approximately \(1.25\mbox{\sc{e}-}12\). \\
-    Graphically, this can be interpreted to be the point in 3D space, that is the intersection of three planes.\\
-    
-    We have found that changing a\textsubscript{2,2} from -4.273 to -4.275 decreased the maximum possible error
-    to approximately \(1.24\mbox{\sc{e}-}12\). However, we noticed that the actual error of the vector X increased in this case.\\
-    Graphically, we can say that the point moved away from the intersection of the planes.
+    The condition number has increased again.
+
+
+
+
+\subsection{Solution for n=13}
+    We get the following results
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+       2.6882
+        -2.65
+       4.4667
+     -0.91978
+       1.6926
+      0.82808
+       1.0302
+      0.99622
+       1.0003
+      0.99998
+            1
+            1
+            1
+
+Vector r, residual of solving by LU decomposition:
+      -66.275
+       142.06
+      -133.52
+       73.034
+      -25.974
+       6.3446
+      -1.0941
+      0.13448
+    -0.011716
+   0.00070686
+  -2.8076e-05
+   6.6017e-07
+  -6.9591e-09
+
+Condition number = 6.2191e+13 / 6.1062e-05 = 1.0185e+18
+\end{lstlisting}
+    The condition number has increased again.
+
+
+
+
+\subsection{Solution for n=14}
+    We get the following results
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+      0.17084
+       2.3299
+      0.30066
+      0.98717
+       1.1907
+      0.89236
+        1.033
+      0.99344
+       1.0009
+      0.99992
+            1
+            1
+            1
+            1
+
+Vector r, residual of solving by LU decomposition:
+      -941.62
+         2021
+      -1911.7
+       1060.2
+      -386.08
+       97.825
+      -17.794
+       2.3584
+     -0.22827
+     0.015965
+  -0.00078561
+   2.5795e-05
+  -5.0724e-07
+   4.5171e-09
+
+Condition number = 2.1314e+15 / 0.00017035 = 1.2512e+19
+\end{lstlisting}
+    The condition number has increased again.
+
+
+
+
+\subsection{Solution for n=15}
+    We get the following results
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+      -6721.2
+        15434
+       -15775
+       9552.4
+      -3837.3
+       1086.8
+      -222.48
+       35.065
+      -2.8712
+       1.3269
+      0.97978
+       1.0009
+      0.99997
+            1
+            1
+
+Vector r, residual of solving by LU decomposition:
+       -12716
+        28066
+       -27411
+        15768
+      -5991.5
+       1596.1
+      -308.34
+        44.01
+      -4.6765
+      0.36907
+    -0.021347
+    0.0008794
+   -2.444e-05
+   4.1093e-07
+  -3.1584e-09
+
+Condition number = 7.8805e+16 / 0.00074503 = 1.0577e+20
+\end{lstlisting}
+    The condition number has increased again.
+
+
+
+
+
+\newpage
+\section{Discussion}
+We notice that when n increases, so does the condition number of each system.
+This makes sense, as larger and larger numbers are added to the system while the rest of the system stays the same.
+The scale of the system becomes larger each time.\\
+As a result of this, at each increment of n, X seems to move farther away from the vector of all ones. The residual vector becomes worse each time as well.\\
+
+For each n, we looked at the result of changing the cell (10, 2) of the input matrix to 1. \\
+For n = 10, we found:
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+       1.5211
+   -0.0052109
+       1.8263
+      0.61862
+       1.1093
+      0.97977
+       1.0024
+      0.99982
+            1
+            1
+\end{lstlisting}
+
+For n = 15, we found:
+\begin{lstlisting}
+Vector X, result of solving with LU decomposition:
+       9.2501
+   -0.0060889
+      -19.703
+       28.878
+      -17.302
+       8.4653
+      -1.0681
+       1.4059
+      0.94242
+       1.0059
+      0.99956
+            1
+            1
+            1
+            1
+\end{lstlisting}
+
+We see that the small perturbation cause a relatively small change in the solution when n = 10, where the condition number is relatively small compared to the other ones.
+On the other hand, the small perturbation caused a very large change in the solution where n = 15.
+If we look at the l\textsubscript{2} norms for example, the norm changed from 3.16 to 3.50 when n = 10, and changed from 25287.12 to 41.10 when n = 15.
 
 \onecolumn
 \appendix
@@ -311,9 +512,9 @@ Vector X, result of solving with LU decomposition:
 	\subsection{functions.cpp}
 		\lstinputlisting[basicstyle=\scriptsize]{../functions.cpp}
 
-\newpage
 \section{Output}
-	\subsection{output.txt}
-		\lstinputlisting[basicstyle=\scriptsize]{../build/output.txt} 
+	\subsection{output\_n\_10.txt}
+		\lstinputlisting[basicstyle=\scriptsize]{../build/output_n_10.txt}
+\newpage
 		
 \end{document}

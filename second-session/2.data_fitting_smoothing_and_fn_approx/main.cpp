@@ -1,6 +1,5 @@
 #include <iostream>
 #include "./functions.h"
-#include "math.h"
 
 int main (void) {
     const int m = 21;
@@ -22,21 +21,10 @@ int main (void) {
     }
 
     // trigonometric polynomial interpolation and trigonometric least squares approximation0
-    trigonometricApproximation(m, 1, x_i, a, b, y_i);
     trigonometricApproximation(m, 2, x_i, a, b, y_i);
-    trigonometricApproximation(m, 3, x_i, a, b, y_i);
     trigonometricApproximation(m, 4, x_i, a, b, y_i);
-    trigonometricApproximation(m, 5, x_i, a, b, y_i);
-    trigonometricApproximation(m, 6, x_i, a, b, y_i);
     trigonometricApproximation(m, 7, x_i, a, b, y_i);
-    trigonometricApproximation(m, 8, x_i, a, b, y_i);
-    trigonometricApproximation(m, 9, x_i, a, b, y_i);
     trigonometricApproximation(m, 10, x_i, a, b, y_i);
-    trigonometricApproximation(m, 11, x_i, a, b, y_i);
-    trigonometricApproximation(m, 12, x_i, a, b, y_i);
-    trigonometricApproximation(m, 13, x_i, a, b, y_i);
-    trigonometricApproximation(m, 14, x_i, a, b, y_i);
-    trigonometricApproximation(m, 15, x_i, a, b, y_i);
 
     // 4 examples of fourrier approximation from the book, works perfectly...
     /*

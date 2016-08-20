@@ -42,7 +42,7 @@ y_1 = fminbnd(matlabFunction(f(x)), -1, 1);
 y_2 = f(fminbnd(matlabFunction(-1 * f(x)), -1, 1));
 monteCarloResults3DVersion = [];
 
-for n = [200 500 1000 2000 3500 5000 6500 8000 10000]
+for n = [200 500 1000 2000 3500 5000]
     monteCarloArea = monteCarloIntegration(@(x) f(x), -1, 1, n);
     monteCarloResults2DVersion = [monteCarloResults2DVersion
                          n monteCarloArea abs(area - monteCarloArea)];

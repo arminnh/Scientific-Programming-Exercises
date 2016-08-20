@@ -4,16 +4,10 @@
 #include <iomanip>
 #include <iostream>
 #include <gsl/gsl_linalg.h>
-#include <stdio.h>
 #include <gsl/gsl_math.h>
-#include <gsl/gsl_deriv.h>
 #include <gsl/gsl_spline.h>
 #include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <sstream>
-#include <gsl/gsl_sf_log.h>
-#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_sf_trig.h>
 
 const int PRINT_WIDTH = 13;
@@ -359,7 +353,8 @@ void fourrierSolve(int n, double *t_i, double *x_i, int m, std::ofstream &out) {
         }
     }
 
-    // print out the  approximation function
+    // print out the approximation function
+    /*std::cout << "n = " << n << " approximation: \n\t";
     std::cout << "f(x) = " << coeff[0] << " + " ;
     for (int i = 1; i <= m; i++) {
         int j = 2 * i;
@@ -367,7 +362,9 @@ void fourrierSolve(int n, double *t_i, double *x_i, int m, std::ofstream &out) {
         std::cout << coeff[j]   << "*sin(" << i << "x)";
         std::cout << ((i != m) ? " + " : "\n");
     }
+    std::cout << std::endl;*/
 
+    out << "#m=1,S=0\n";
     // generate approximated values
     for (double x = 0; x < 2*M_PI + 0.001; x = x + 0.001) {
         double y = coeff[0];
@@ -407,13 +404,9 @@ void trigonometricApproximation(int n, int m, double *t_i, double a, double b, d
         out << t_rescaled[i]  << " "  << x_i[i] << std::endl;
     }
 
-    std::cout << "n = " << n << " equidistant points as time values in [" << a << ", " << b << "] rescaled to [0 , 2pi]: \n\t";
-    printArray(t_rescaled, n);
+    //std::cout << "n = " << n << " equidistant points as time values in [" << a << ", " << b << "] rescaled to [0 , 2pi]: \n\t";
+    //printArray(t_rescaled, n);
 
-    out << "#m=1,S=0\n";
-    std::cout << "n = " << n << " approximation: \n\t";
     fourrierSolve(n, t_rescaled, x_i, m, out);
-    std::cout <<  std::endl;
-
     out.close();
 }

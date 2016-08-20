@@ -77,7 +77,7 @@ void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
     size_t size_i = A->size1;
     size_t size_j = A->size2;
 
-    //Initialize all the necessary matrices and vectors
+    // initialize all the necessary matrices and vectors
     gsl_matrix *LU = gsl_matrix_alloc(size_i, size_j),
                *U  = gsl_matrix_alloc(size_i, size_j),
                *V  = gsl_matrix_alloc(size_j, size_j);
@@ -87,27 +87,27 @@ void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
                *S    = gsl_vector_alloc(size_j),
                *work = gsl_vector_alloc(size_j);
 
-    //gsl_permutation and pInt are necessary to do the LU decomposition
+    // gsl_permutation and pInt are necessary to do the LU decomposition
     gsl_permutation *P = gsl_permutation_alloc(size_i);
     int sigNum;
 
-    //Copy the contents in matrix A to matrices LU and U
-    //We will work with LU and U so A won't be overwritten
+    // copy the contents in matrix A to matrices LU and U
+    // we will work with LU and U so A won't be overwritten
     gsl_matrix_memcpy(LU, A);
     gsl_matrix_memcpy(U, A);
 
-    //Do the LU decomposition
-    //The algorithm used in the decomposition is Gaussian Elimination with partial pivoting
+    // do the LU decomposition
+    // the algorithm used in the decomposition is Gaussian Elimination with partial pivoting
     gsl_linalg_LU_decomp(LU, P, &sigNum);
 
-    //Solve the system of equations, put the result in X and the residual vector in r
+    // solve the system of equations, put the result in X and the residual vector in r
     gsl_linalg_LU_solve(LU, P, Y, X);
     gsl_linalg_LU_refine(A, LU, P, Y, X, r);
 
-    //Do a singular value decomposition, we will use values of S to calculate the condition number of A
+    // do a singular value decomposition, we will use values of S to calculate the condition number of A
     gsl_linalg_SV_decomp(U, V, S, work);
 
-    //The condition number we will use is max(S) / min(S)
+    // the condition number we will use is max(S) / min(S)
     double condNumber, minS, maxS;
     minS = gsl_vector_get(S, 0); maxS = gsl_vector_get(S, 0);
     for (int j = 0; j < size_j; j++) {
@@ -116,7 +116,7 @@ void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
     }
     condNumber = fabs(maxS) / fabs(minS);
 
-    //Write out all of the results
+    // write out all of the results
     printMatrixCoutAndFile(A,  "Input Matrix A", out);
     printVectorCoutAndFile(Y,  "Input Vector Y", out);
     printMatrixCoutAndFile(LU, "LU, result of LU decomposition", out);
@@ -129,8 +129,49 @@ void solve(gsl_matrix *A, gsl_vector *Y, std::ostream &out) {
     out << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
     out << "Condition number = " << fabs(maxS) << " / " << fabs(minS) << " = " << condNumber << "\n\n";
 
-    //Free the memory
+    // free the memory
     gsl_matrix_free(LU); gsl_matrix_free(U); gsl_matrix_free(V);
     gsl_vector_free(X); gsl_vector_free(r); gsl_vector_free(S); gsl_vector_free(work);
     gsl_permutation_free(P);
+}
+
+
+// formula: sum_{j=1}^{n} ((1+i)^(j-1)) * x_j   =   ((1+i)^n - 1) / i
+double formulaLeft(double i, double j)
+{
+    return pow(1+i, j-1);
+}
+
+// formula: sum_{j=1}^{n} ((1+i)^(j-1)) * x_j   =   ((1+i)^n - 1) / i
+double formulaRight(double i, int n)
+{
+    return (pow(1+i, n) - 1) / i;
+}
+
+
+double checkValuesInFormula(double i, int n)
+{
+    double leftSide = 0, rightSide = 0;
+    //i *= drand48()*100;
+
+    for (int j = 1; j <= n; j++) {
+        leftSide += formulaLeft(i, j);
+    }
+    rightSide = formulaRight(i, n);
+
+    std::cout << "i = "           <<  std::setw(5) << std::setprecision(3) << i << ", n = " << n
+              << ", left side:  " << std::setw(10) << std::setprecision(5) << leftSide
+              << ", right side: " << std::setw(10) << std::setprecision(5) << rightSide << std::endl;
+}
+
+
+void fillSystem(gsl_matrix* A, gsl_vector *Y, int n)
+{
+    for (size_t row = 0; row < n; ++row) {
+        for (size_t col = 0; col < n; ++col) {
+            gsl_matrix_set(A, row, col, formulaLeft(row+1, col+1));
+        }
+        gsl_vector_set(Y, row, formulaRight(row+1, n));
+        //checkValuesInFormula(row+1, n);
+    }
 }
