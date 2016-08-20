@@ -50,7 +50,7 @@
 
 
 \section{Problem}
-    We are given data points \( (x_i, f_i), i = 0, ..., 20 \) with \( x_i = i - 10 \) and \( f_i = (-1)^1 \) and have to do the following:
+    We are given data points \( (x_i, f_i), i = 0, ..., 20 \) with \( x_i = i - 10 \) and \( f_i = (-1)^i \) and are tasked do the following:
     \begin{enumerate}
         \item Calculate a polynomial interpolant through the data
         \item Calculate the natural cubic spline for the data
@@ -58,11 +58,19 @@
         \item Calculate the trigonometric polynomial interpolant
         \item Calculate a trigonometric least squares approximant
     \end{enumerate}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=10cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/dataPoints.png}
+        \caption{The given data points}
+        \label{fig:datapoints}
+    \end{figure}
+
     All of this will be done using C++ and the \href{http://www.gnu.org/software/gsl/}{GNU Scientific Library}.
-    In the solutions, we will briefly describe what we did with excerpts from the code, generate graphs using the interpolation and approximation methods and discuss the results.
+    In the solutions, we briefly describe what we did with excerpts from the code, generate graphs using the interpolation and approximation methods and discuss the results.
 
 \section{Using the code}
-    All of the C++ code can be found in the "main.cpp" file and in appendix A of this document.
+    All of the C++ code can be found in the .cpp files and in appendix A of this document.
     main.cpp comes accompanied by createImages.sh, which contains all of the necessary UNIX commands to generate the graph images.
     This file relies on the \href{https://www.gnu.org/software/plotutils/manual/en/html_node/graph.html}{graph} program
     in the GNU plotutils package to plot graphs, so make sure that it is installed.
@@ -74,10 +82,9 @@
     chmod +x ./createImages.sh
     ./data_fitting_smoothing_and_fn_approx.bin
     \end{lstlisting}
-    All of the graphs should be present in the build/images/ directory. If they are not there, make createImages.sh
+    All of the graphs should be present in the build/images/ directory. If they are not there, make sure createImages.sh is
     executable with "chmod +x" and run it to create them.
 
-\newpage
 \section{Solutions}
 
 \subsection{Polynomial interpolant}
@@ -94,7 +101,7 @@
     {gsl\_spline} functions do not mean we are working with splines, despite what their name may suggest.
     They simply provide a higher level interface so that we can write less code later on. \\ The type of the interpolation
     we will work with is passed into the gsl\_spline\_alloc function. In this case, gsl\_spline\_init  will
-    use gsl\_poly\_dd\_init to initialize the polynomial we will use. gsl\_poly\_dd\_init uses the Newton polynomial,
+    use gsl\_poly\_dd\_init to initialize the polynomial we will use. gsl\_poly\_dd\_init uses Newton's divided differences to build the polynomial,
     which is what we need to calculate new interpolation points. \\
 
     Now, we can plot a graph.
@@ -134,19 +141,28 @@
     and plot the grap. The result is visible in figure~\ref{fig:spline1}.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=10cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/cubicSpline.png}
-        \caption{Cubic spline interpolation through the given data points}
+        \includegraphics[width=10cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/cubicSplineNatural.png}
+        \caption{Natural cubic spline interpolation through the given data points}
         \label{fig:spline1}
     \end{figure}
     We get a much nicer result than the polynomial interpolation.
     However, we see that near the end points the interpolation goes beyond -1.
-    This leads us to believe that for the given data, the end conditions of the cubic spline are not satisfied.
+    This leads us to believe that for the given data, the end conditions of the cubic spline are not satisfied. \\
+
+    We achieve more favorable results by using a cubic spline with periodic boundary conditions. This is done by
+    passing gsl\_interp\_cspline\_periodic into the gsl spline allocator.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=10cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/cubicSplinePeriodic.png}
+        \caption{Periodic cubic spline interpolation through the given data points}
+        \label{fig:spline1}
+    \end{figure}
 
 \subsection{Least squares approximation}
 To get a least squares approximation, we find an optimal solution for the equation
     \[ \lambda_1 f_1(x_i) + ... +  \lambda_n f_n(x_i) = y_i \ \ where \ \ i = 1,...,m \gg n \]
 where m stands for the amount of given data points and n for the amount of unknowns we want to calculate.
-This equation can be written as an overdetermined system of equations of the form \(A\lambda - y\).
+This equation can be written as an overdetermined system of equations of the form \(A\lambda = y\).
 The system is constructed in the code as follows:
 \begin{lstlisting}
 gsl_matrix *A = gsl_matrix_alloc(size, n);
@@ -172,7 +188,7 @@ gsl_linalg_QR_lssolve(QR, tau, Y, X, R);
 \end{lstlisting}
 
 \subsection{Results}
-    We found the least squares solutions for the system for n = 2, 4, 7, 10, 15, 20 and 21. Detailed output of the solutions for the systems can be found in the output/ directory.
+    We calculated the least squares solutions for the system for n = 4, 7, 10, 15, 20, and 21. Detailed output of the solutions for the systems can be found in the output/ directory.
     We show the graphs for these solutions here:
     \begin{figure}[H]
         \begin{minipage}[b]{0.49\textwidth}
@@ -240,22 +256,77 @@ for (int j = 0; j < n; j++) {
 }
 condNumber = fabs(maxS) / fabs(minS);
 \end{lstlisting}
-    We find following condition numbers for n = 2, 4, 7, 10, 15, 20 and 21
+    We find the following condition numbers
 \begin{lstlisting}
-
+	n = 4:   Condition number: 1.6514
+	n = 7:   Condition number: 91.935
+	n = 10: Condition number: 1294.9
+	n = 15: Condition number: 1.8592e+05
+	n = 20: Condition number: 1.2585e+08
+	n = 21: Condition number: 8.3138e+08
 \end{lstlisting}
+More details for each system can be found in the output/leastSquares\_degree\_*.txt files
 
-    Thus, we can conclude that our solution \[ \exp(g(x)) = \exp(2.10317965707954 - 0.403985459719526x) \]
-    is a pretty accurate approximation model for the given datapoints if we choose n to be 2.
+A way to improve our results and lower the condition numbers would be to use the Legendre polynomials as basis functions instead
+of \( f_i(x) = x^i \), but that was not done in these solutions.
 
 
-\subsubsection{Improvement of results}
-One way to improve our results and lower the condition number would be to use the Legendre polynomials as basis functions instead
-of \( f_i(x) = x^i  \), but that was not done in these solutions.
 \subsection{Trigonometric polynomial interpolant}
-Wat is het voordeel van equidistante punten te hebben?
+We find a trigonometric polynomial interpolant by using a function of the form:
+    \[ f(t) = \frac{a_0}{2} + a_1 \cos (t) + a_2 \cos(2t) + ... + a_m \cos(mt) + b_1 \sin (t) + b_2 \sin (2t) + ... + b_m \sin (mt) \]
+Because the given data points are evenly spaced, we can use a simple function to calculate the unknown \( a_i \)'s and \(b_i \)'s:
+\begin{lstlisting}
+double fourierCoefficient(int j, int n, double *t_i, double *x_i, bool a) {
+    double result = 0;
+
+    for (int k = 0; k < n; k++) {
+        result += x_i[k] * ((a) ? gsl_sf_cos(j * t_i[k]) : gsl_sf_sin(j * t_i[k]));
+    }
+
+    result *= 2.0/(double) n;
+    return result;
+}
+\end{lstlisting}
+We fill in the function with \(n = amount \ of \ given\  data \ points = 21\) and \(m = 10\). With \(m = 10\), there are \(2m+1 = 21\)
+coefficients, so we can do interpolation.
+Using the function, we get the following graph:
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=10cm, trim={1cm, 3cm, 1cm, 2cm}, clip]{../build/images/trigApprox_n_21_m_10.png}
+        \caption{Trigonometric interpolation through the given data points}
+        \label{fig:spline1}
+    \end{figure}
+
+
 \subsection{Trigonometric least squares approximant}
-Kies je een oneven/even aantal termen
+We use the same function
+    \[ f(t) = \frac{a_0}{2} + a_1 \cos (t) + a_2 \cos(2t) + ... + a_m \cos(mt) + b_1 \sin (t) + b_2 \sin (2t) + ... + b_m \sin (mt) \]
+with the same n = 21. This time we choose m such that \( n > 2m+1 \) holds true. The choice of an even vs. an uneven amount
+of terms does not matter here. The only time it matters is when \( n = 2m \). In that case, the function \( f(t) \) changes slightly.
+Using the function, we get the following graphs for m = 2, 4, and 7:
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/trigApprox_n_21_m_2.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/trigApprox_n_21_m_4.png}
+        \end{minipage}
+        \caption{Trigonometric least squares approximation for the given data points with m = 2 and 4}
+        \label{fig:results4}
+    \end{figure}
+    \begin{figure}[H]
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/trigApprox_n_21_m_7.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.49\textwidth}
+            \includegraphics[width=6.5cm, trim={2cm, 4cm, 2cm, 3cm}, clip]{../build/images/trigApprox_n_21_m_9.png}
+        \end{minipage}
+        \caption{Trigonometric least squares approximation for the given data points with m = 7 and 9}
+        \label{fig:results4}
+    \end{figure}
+
 
 \onecolumn
 \appendix

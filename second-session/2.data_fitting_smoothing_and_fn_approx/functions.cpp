@@ -124,9 +124,10 @@ void fillFArrays(double *x_i, double *y_i, int n)
 
 void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
 {
-    std::ofstream polynomialInterp, cubicSpline;
+    std::ofstream polynomialInterp, cubicSplineNatural, cubicSplinePeriodic;
     polynomialInterp.open("images/polynomialInterp.dat");
-    cubicSpline.open("images/cubicSpline.dat");
+    cubicSplineNatural.open("images/cubicSplineNatural.dat");
+    cubicSplinePeriodic.open("images/cubicSplinePeriodic.dat");
 
     if (!polynomialInterp.is_open()) {
         return;
@@ -137,25 +138,30 @@ void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
     // allocate polynomial interpolant
     gsl_spline *interp_poly = gsl_spline_alloc(gsl_interp_polynomial, m);
     // allocate natural cubic spline interpolant
-    gsl_spline *interp_cspline = gsl_spline_alloc(gsl_interp_cspline, m);
+    gsl_spline *interp_cspline_n = gsl_spline_alloc(gsl_interp_cspline, m);
+    gsl_spline *interp_cspline_p = gsl_spline_alloc(gsl_interp_cspline_periodic, m);
 
     // initialize interpolants
     gsl_spline_init(interp_poly, x_i, y_i, m);
-    gsl_spline_init(interp_cspline, x_i, y_i, m);
+    gsl_spline_init(interp_cspline_n, x_i, y_i, m);
+    gsl_spline_init(interp_cspline_p, x_i, y_i, m);
 
     // WRITE POINTS TO FILES
 
     // mark following points with a plus
-    polynomialInterp << "#m=0,S=3\n";
-    cubicSpline      << "#m=0,S=3\n";
+    polynomialInterp    << "#m=0,S=3\n";
+    cubicSplineNatural  << "#m=0,S=3\n";
+    cubicSplinePeriodic << "#m=0,S=3\n";
     for (int i = 0; i < m; i++) {
-        polynomialInterp << x_i[i] << " " << y_i[i] << std::endl;
-        cubicSpline      << x_i[i] << " " << y_i[i] << std::endl;
+        polynomialInterp    << x_i[i] << " " << y_i[i] << std::endl;
+        cubicSplineNatural  << x_i[i] << " " << y_i[i] << std::endl;
+        cubicSplinePeriodic << x_i[i] << " " << y_i[i] << std::endl;
     }
 
     // connect the following points with a line
-    polynomialInterp << "#m=1,S=0\n";
-    cubicSpline      << "#m=1,S=0\n";
+    polynomialInterp    << "#m=1,S=0\n";
+    cubicSplineNatural  << "#m=1,S=0\n";
+    cubicSplinePeriodic << "#m=1,S=0\n";
 
     double interpValue;
     gsl_interp_accel *acc = gsl_interp_accel_alloc();
@@ -163,16 +169,21 @@ void polynomialAndSplineSolutions(int m, double *x_i, double *y_i)
         interpValue = gsl_spline_eval(interp_poly, x, acc);
         polynomialInterp << x << " " << interpValue << "\n";
 
-        interpValue = gsl_spline_eval(interp_cspline, x, acc);
-        cubicSpline << x << " " << interpValue << "\n";
+        interpValue = gsl_spline_eval(interp_cspline_n, x, acc);
+        cubicSplineNatural << x << " " << interpValue << "\n";
+
+        interpValue = gsl_spline_eval(interp_cspline_p, x, acc);
+        cubicSplinePeriodic << x << " " << interpValue << "\n";
     }
 
     // free the memory and close the files
     gsl_interp_accel_free(acc);
     gsl_spline_free(interp_poly);
-    gsl_spline_free(interp_cspline);
+    gsl_spline_free(interp_cspline_n);
+    gsl_spline_free(interp_cspline_p);
     polynomialInterp.close();
-    cubicSpline.close();
+    cubicSplineNatural.close();
+    cubicSplinePeriodic.close();
 }
 
 // solve overdetermined matrix where m = amount of points, n = amount of unknowns, x_i = array of x values in [a, b], y_i = array of y values
@@ -216,14 +227,14 @@ void leastSquaresApproximation(int m, int n, double *x_i, double a, double b, do
     }
 
     // initialize work matrices and vectors
-    gsl_matrix *QR = gsl_matrix_alloc(m, n),
-               *U = gsl_matrix_alloc(m, n),
-               *V = gsl_matrix_alloc(n, n);
     gsl_vector *tau = gsl_vector_alloc(n),
                *X = gsl_vector_alloc(n),
                *R = gsl_vector_alloc(m),
                *S = gsl_vector_alloc(n),
                *work = gsl_vector_alloc(n);
+    gsl_matrix *QR = gsl_matrix_alloc(m, n),
+               *U = gsl_matrix_alloc(m, n),
+               *V = gsl_matrix_alloc(n, n);
 
     gsl_matrix_memcpy(QR, A);
     gsl_matrix_memcpy(U, A);
@@ -267,17 +278,17 @@ void leastSquaresApproximation(int m, int n, double *x_i, double a, double b, do
     }
 
     // the condition number we will use is max(S) / min(S)
-    //gsl_linalg_SV_decomp(U, V, S, work);
-    //double condNumber, minS, maxS;
-    //minS = gsl_vector_get(S, 0);
-    //maxS = gsl_vector_get(S, 0);
-    //for (int j = 0; j < n; j++) {
-    //    if (gsl_vector_get(S, j) < minS) minS = gsl_vector_get(S, j);
-    //    if (gsl_vector_get(S, j) > maxS) maxS = gsl_vector_get(S, j);
-    //}
-    //condNumber = fabs(maxS) / fabs(minS);
-    //output << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
-    //output << "Condition number: " << condNumber << std::endl;
+    gsl_linalg_SV_decomp(U, V, S, work);
+    double condNumber, minS, maxS;
+    minS = gsl_vector_get(S, 0);
+    maxS = gsl_vector_get(S, 0);
+    for (int j = 0; j < n; j++) {
+        if (gsl_vector_get(S, j) < minS) minS = gsl_vector_get(S, j);
+        if (gsl_vector_get(S, j) > maxS) maxS = gsl_vector_get(S, j);
+    }
+    condNumber = fabs(maxS) / fabs(minS);
+    output << "Calculating condition number by: abs(max(singular values)) / abs(min(singular values)):\n\t";
+    output << "Condition number: " << condNumber << std::endl;
 
     // free the memory and close the files
     gsl_matrix_free(A);
@@ -294,7 +305,7 @@ void leastSquaresApproximation(int m, int n, double *x_i, double a, double b, do
     approximation.close();
 }
 
-double fourrierCoefficient(int j, int n, double *t_i, double *x_i, bool a) {
+double fourierCoefficient(int j, int n, double *t_i, double *x_i, bool a) {
     double result = 0;
 
     for (int k = 0; k < n; k++) {
@@ -305,15 +316,15 @@ double fourrierCoefficient(int j, int n, double *t_i, double *x_i, bool a) {
     return result;
 }
 
-void fourrierSolve(int n, double *t_i, double *x_i, int m, std::ofstream &out) {
+void fourierSolve(int n, double *t_i, double *x_i, int m, std::ofstream &out) {
     double coeff[2 * m + 1];
-    coeff[0] = fourrierCoefficient(0, n, t_i, x_i, true) / 2;
+    coeff[0] = fourierCoefficient(0, n, t_i, x_i, true) / 2;
 
     // generate coefficients
     for (int i = 1; i <= m; i++) {
         int j = 2 * i;
-        coeff[j-1] = fourrierCoefficient(i, n, t_i, x_i, true);
-        coeff[j]   = fourrierCoefficient(i, n, t_i, x_i, false);
+        coeff[j-1] = fourierCoefficient(i, n, t_i, x_i, true);
+        coeff[j]   = fourierCoefficient(i, n, t_i, x_i, false);
 
         // if n == 2m, divide last a coefficient by 2. last b coefficient will be 0
         if (i == m and n == 2*m) {
@@ -376,6 +387,6 @@ void trigonometricApproximation(int n, int m, double *t_i, double a, double b, d
     //std::cout << "n = " << n << " equidistant points as time values in [" << a << ", " << b << "] rescaled to [0 , 2pi]: \n\t";
     //printArray(t_rescaled, n);
 
-    fourrierSolve(n, t_rescaled, x_i, m, out);
+    fourierSolve(n, t_rescaled, x_i, m, out);
     out.close();
 }

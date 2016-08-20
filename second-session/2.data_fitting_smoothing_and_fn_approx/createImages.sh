@@ -6,11 +6,12 @@ IMAGEFORMATTING="-T png  --bitmap-size 820x820"
 
 echo "Creating images ..."
 
-graph -L "Given data points"                  -x -11.0 11.0 -y -1.2 1.2 $IMAGEFORMATTING < $DIR/dataPoints.dat       > $DIR/dataPoints.png
-graph -L "Polynomial interpolation"           -x -11.0 11.0             $IMAGEFORMATTING < $DIR/polynomialInterp.dat > $DIR/polynomialInterp.png
-graph -L "Polynomial interpolation"           -x -11.0 11.0 -y -100 100 $IMAGEFORMATTING < $DIR/polynomialInterp.dat > $DIR/polynomialInterp_zoomed_1.png
-graph -L "Polynomial interpolation"           -x -11.0 11.0 -y -1.5 1.5 $IMAGEFORMATTING < $DIR/polynomialInterp.dat > $DIR/polynomialInterp_zoomed_2.png
-graph -L "Natural cubic spline interpolation" -x -11.0 11.0 -y -1.2 1.2 $IMAGEFORMATTING < $DIR/cubicSpline.dat      > $DIR/cubicSpline.png
+graph -L "Given data points"                   -x -11.0 11.0 -y -1.2 1.2 $IMAGEFORMATTING < $DIR/dataPoints.dat          > $DIR/dataPoints.png
+graph -L "Polynomial interpolation"            -x -11.0 11.0             $IMAGEFORMATTING < $DIR/polynomialInterp.dat    > $DIR/polynomialInterp.png
+graph -L "Polynomial interpolation"            -x -11.0 11.0 -y -100 100 $IMAGEFORMATTING < $DIR/polynomialInterp.dat    > $DIR/polynomialInterp_zoomed_1.png
+graph -L "Polynomial interpolation"            -x -11.0 11.0 -y -1.5 1.5 $IMAGEFORMATTING < $DIR/polynomialInterp.dat    > $DIR/polynomialInterp_zoomed_2.png
+graph -L "Natural cubic spline interpolation"  -x -11.0 11.0 -y -1.2 1.2 $IMAGEFORMATTING < $DIR/cubicSplineNatural.dat  > $DIR/cubicSplineNatural.png
+graph -L "Periodic cubic spline interpolation" -x -11.0 11.0 -y -1.2 1.2 $IMAGEFORMATTING < $DIR/cubicSplinePeriodic.dat > $DIR/cubicSplinePeriodic.png
 
 for n in 2 4 7 10
 do
@@ -23,9 +24,9 @@ do
     graph -L "Least squares approx with n = "$n -x -1.1 1.1 -y -1.1 1.1 $IMAGEFORMATTING < $DIR/leastSquares_degree_$n.dat > $DIR/leastSquares_degree_$n.png
 done
 
-for m in 2 4 7 10
+for m in 2 4 7 9 10
 do
-    graph -L "Fourrier approx with n=21, m="$m -x -0.3 6.7 -y -2.5 2.5 $IMAGEFORMATTING < $DIR/trigApprox_n_21_m_$m.dat > $DIR/trigApprox_n_21_m_$m.png
+    graph -L "Trigonometric approx with n=21, m="$m -x -0.3 6.7 -y -2.5 2.5 $IMAGEFORMATTING < $DIR/trigApprox_n_21_m_$m.dat > $DIR/trigApprox_n_21_m_$m.png
 done
 
 #graph -x -0.3 6.7 $IMAGEFORMATTING < $DIR/trigApprox_n_5_m_1.dat > $DIR/trigApprox_n_5_m_1.png

@@ -25,9 +25,10 @@ int main (void) {
     trigonometricApproximation(m, 2, x_i, a, b, y_i);
     trigonometricApproximation(m, 4, x_i, a, b, y_i);
     trigonometricApproximation(m, 7, x_i, a, b, y_i);
+    trigonometricApproximation(m, 9, x_i, a, b, y_i);
     trigonometricApproximation(m, 10, x_i, a, b, y_i);
 
-    // 4 examples of fourrier approximation from the book, works perfectly...
+    // 4 examples of fourier approximation from the book, works perfectly...
     /*
     double tt[] = {0, 2*M_PI/5, 4*M_PI/5, 6*M_PI/5, 8*M_PI/5}, xx[] = {1, 3, 2, 0, -1};
     trigonometricApproximation(5, 1, tt, 0, 2*M_PI, xx);
