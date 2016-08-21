@@ -15,9 +15,8 @@ gaussLegendreResult = [gaussLegendre(@(x) f(x), -1, 1, 3)]
 
 monteCarloResults = [];
 
-for n = [200 500 1000 2000 3500 5000]
+for n = [200 500 1000 2000 3500]
     monteCarloArea = monteCarloIntegration(@(x) f(x), -1, 1, n);
     monteCarloResults = [monteCarloResults
-                         n monteCarloArea abs(area - monteCarloArea)];
+                         n monteCarloArea abs(area - monteCarloArea)]
 end
-monteCarloResults
